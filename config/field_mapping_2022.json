@@ -364,7 +364,8 @@
       "classification": "critical",
       "category": "lane_identification",
       "validation_rules": {
-        "pattern": "^(\\d{1}[RWUIQB]-[LR]|ALL)$"
+        "pattern": "^(\\d{1}[RWUIQB]-[LR]|ALL)$",
+        "multiple_lanes_pattern": "^\\d{1}[RWUIQB]-[LR](,\\s*\\d{1}[RWUIQB]-[LR])+$"
       },
       "lane_types": {
         "R": "Rijstrook (Regular lane)",
@@ -375,7 +376,70 @@
         "B": "Busstrook (Bus lane)",
         "ALL": "Rijbaanbreed (Full carriageway width)"
       },
-      "description": "Lane identification with type and direction"
+      "description": "Lane identification with type and direction",
+      "data_extraction_rules": {
+        "importance": "CRITICAL - 影响数据提取的行数",
+        "multiple_lanes_handling": {
+          "description": "当STROOK字段包含多个车道（逗号分隔）时的处理规则",
+          "rule": "将一行原始数据拆分为多行数据库记录，每行代表一个独立车道",
+          "format": "多个车道用逗号+空格分隔，例如: '2R-R, 1Q-R'",
+          "splitting_logic": {
+            "step1": "检测STROOK字段是否包含逗号",
+            "step2": "按逗号分割车道列表",
+            "step3": "为每个车道创建独立的数据库记录",
+            "step4": "除STROOK字段外，其他字段值保持完全一致"
+          },
+          "example": {
+            "original_excel_row": {
+              "Weg": "12",
+              "BAAN": "1HRR",
+              "STROOK": "2R-R, 1Q-R",
+              "VAN": 10.5,
+              "TOT": 12.3,
+              "DEKLAAGSOORT": "DZOAB",
+              "note": "1行原始数据"
+            },
+            "extracted_database_records": [
+              {
+                "Weg": "12",
+                "BAAN": "1HRR",
+                "STROOK": "2R-R",
+                "VAN": 10.5,
+                "TOT": 12.3,
+                "DEKLAAGSOORT": "DZOAB",
+                "note": "第1条数据库记录"
+              },
+              {
+                "Weg": "12",
+                "BAAN": "1HRR",
+                "STROOK": "1Q-R",
+                "VAN": 10.5,
+                "TOT": 12.3,
+                "DEKLAAGSOORT": "DZOAB",
+                "note": "第2条数据库记录"
+              }
+            ],
+            "result": "1行Excel → 2行数据库记录"
+          },
+          "business_meaning": "多个车道意味着这些车道都进行了相同的维修工作，需要分别记录以便后续按车道统计、查询和分析",
+          "implementation_note": "提取器(extractor)必须实现此拆分逻辑，否则会丢失车道级别的详细信息"
+        },
+        "single_lane_handling": {
+          "description": "当STROOK字段只包含单个车道时",
+          "rule": "直接映射为一条数据库记录，无需拆分",
+          "examples": ["1R-L", "2R-R", "1Q-R", "ALL"]
+        },
+        "validation_after_split": {
+          "description": "拆分后每条记录的验证",
+          "rules": [
+            "每个STROOK值必须符合单车道格式: ^\\d{1}[RWUIQB]-[LR]$ 或 ALL",
+            "STROOK后缀(-L/-R)必须与BAAN类型匹配",
+            "其他所有字段值在拆分记录中保持一致"
+          ]
+        }
+      },
+      "date_added": "2025-11-05",
+      "last_updated": "2025-11-05"
     },
     {
       "field_number": 10,
