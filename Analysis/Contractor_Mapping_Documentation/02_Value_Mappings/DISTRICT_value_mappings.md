@@ -1,0 +1,22 @@
+# DISTRICT - 字段值映射审核
+
+**标准字段编号：** 2
+**中文名称：** 区域
+**标准定义：** 见 [Template_2022_Complete_Field_Reference.md](../../Template_2022_Complete_Field_Reference.md)
+
+---
+
+## 标准值列表
+
+- `NN-Oost`
+- `Zee en Delta`
+- `Noord`
+- `Oost`
+- `Zuid`
+- `West`
+
+## 原始值映射表
+
+| 原始值 | → | 标准值 | 置信度 | 推理方法 | 推理说明 | 审核 | Leon备注 |
+|--------|---|--------|--------|---------|---------|------|----------|
+| `Zuid` | → | `Zuid` | 1.00 | exact_match | 精确匹配标准值 | ✅ | |
