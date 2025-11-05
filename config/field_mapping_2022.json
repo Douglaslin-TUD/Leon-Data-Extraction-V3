@@ -601,13 +601,14 @@
       "field_name_cn": "骨料级配",
       "data_type": "string",
       "required": true,
-      "classification": "critical",
+      "classification": "non-critical",
       "category": "material_specification",
       "validation_rules": {
         "pattern": "^\\d{1,2}/\\d{1,2}$"
       },
       "common_values": ["0/16", "0/11", "0/8", "4/8", "2/6", "0/22"],
-      "description": "Aggregate grain size range (min/max in mm)"
+      "description": "Aggregate grain size range (min/max in mm)",
+      "reclassification_note": "从关键字段改为非关键字段 - 2025-11-05"
     },
     {
       "field_number": 17,
@@ -888,16 +889,207 @@
     {
       "field_number": 19,
       "field_name_nl": "TUSSENLAAG",
-      "field_name_en": "Binder Course",
-      "field_name_cn": "中间层",
+      "field_name_en": "Binder Course / Intermediate Layer",
+      "field_name_cn": "中间层 / 粘结层",
       "data_type": "string",
       "required": false,
       "classification": "non-critical",
       "category": "material_specification",
       "validation_rules": {
-        "enum": ["Ja", "Nee", ""]
+        "type": "string",
+        "max_length": 50,
+        "pattern": "^[A-Z0-9\\s\\/\\-]*$"
       },
-      "description": "Whether a binder course (intermediate layer) is present"
+      "description": "Binder course (intermediate layer) between surface layer (deklaag) and base layer (onderlaag). Can be pure binder, pure base, or hybrid base+bind layer.",
+      "layer_definition": {
+        "position": "位于面层(deklaag)与下面层(onderlaag/base)之间",
+        "primary_role": "中间层/粘结层 (binder course)",
+        "actual_usage": "既有纯粘结层，也有兼做中+下面层的混合层",
+        "structural_function": [
+          "粘结面层与下面层",
+          "传递荷载",
+          "提供结构强度",
+          "某些情况下兼做基层功能"
+        ]
+      },
+      "tussenlaag_types": {
+        "AC_16_Bind": {
+          "standard_name": "AC 16 Bind",
+          "full_name": "Asfaltbeton 16mm Binder",
+          "family": "AC",
+          "gradation": 16,
+          "role": "Bind",
+          "description": "16mm AC粘结层，标准中间层",
+          "usage": "荷兰设计图和RAW成本表中的标准中间层",
+          "most_common": true
+        },
+        "AC_Bind": {
+          "standard_name": "AC Bind",
+          "full_name": "Asfaltbeton Binder (gradation unknown)",
+          "family": "AC",
+          "gradation": "unknown",
+          "role": "Bind",
+          "description": "AC粘结层，粒径未注明",
+          "note": "可能是省略了16/22的粘结层，但保持unknown不做假设"
+        },
+        "AC_Bind_22": {
+          "standard_name": "AC 22 Bind",
+          "original_format": "AC Bind 22",
+          "full_name": "Asfaltbeton 22mm Binder",
+          "family": "AC",
+          "gradation": 22,
+          "role": "Bind",
+          "description": "22mm AC粘结层（格式修正：Bind 22 → 22 Bind）",
+          "note": "原始格式写反了顺序"
+        },
+        "AC_Base_22": {
+          "standard_name": "AC 22 Base",
+          "full_name": "Asfaltbeton 22mm Base",
+          "family": "AC",
+          "gradation": 22,
+          "role": "Base",
+          "description": "22mm AC下面层",
+          "note": "这是Base不是Binder，但出现在TUSSENLAAG字段中",
+          "typical_usage": "荷兰图纸中常见'onderlaag 80mm AC 22 base/OL-C'"
+        },
+        "AC_22_base_bind": {
+          "standard_name": "AC 22 Base/Bind",
+          "original_format": "AC 22 base-bind",
+          "full_name": "Asfaltbeton 22mm Base/Bind Hybrid",
+          "family": "AC",
+          "gradation": 22,
+          "role": "Base+Bind",
+          "description": "AC 22 Base+Bind混合层",
+          "structural_concept": "一层同时承担base + bind结构作用",
+          "purpose": "减薄总厚度",
+          "reference": "文献中有专门的'AC 22 base/bind hybride asfaltmengsel'"
+        },
+        "AC_16_OL_TL": {
+          "standard_name": "AC 16 OL/TL",
+          "full_name": "Asfaltbeton 16mm Onderlaag/Tussenlaag",
+          "family": "AC",
+          "gradation": 16,
+          "role": "Base+Bind",
+          "description": "AC 16通用层，可做底层也可做中层",
+          "structural_concept": "配方既可作onderlaag (OL)也可作tussenlaag (TL)",
+          "actual_usage_in_field": "在该工程中被当作中间层使用",
+          "reference": "Ruschasfalt等搅拌站资料中有AC 16 OL/TL配方"
+        },
+        "AC_22_TL_C": {
+          "standard_name": "AC 22 TL-C",
+          "full_name": "Asfaltbeton 22mm Tussenlaag Coarse",
+          "family": "AC",
+          "gradation": 22,
+          "role": "Bind",
+          "gradation_type": "C (coarse/粗级配)",
+          "description": "22mm粗级配AC中间层，标准binder",
+          "typical_pairing": "tussenlaag 60/70mm AC 22 TL-C + onderlaag 75/80mm AC 22 OL-C",
+          "note": "TL = tussenlaag (中间层), C = coarse (粗级配)",
+          "reference": "设计图中大规模使用"
+        },
+        "STAB": {
+          "standard_name": "STAB",
+          "full_name": "Steenslagasfaltbeton",
+          "name_cn": "碎石沥青混凝土",
+          "family": "STAB",
+          "gradation": null,
+          "role": "Base+Bind",
+          "description": "高稳定性AC族混合料",
+          "usage": "重载路的中间层或下面层",
+          "structural_flexibility": "可用作tussenlaag也可用作onderlaag",
+          "reference": "Heijmans文档中将AC/stab归为'可用作中间层与下面层'"
+        }
+      },
+      "standardization_rules": {
+        "name_corrections": {
+          "AC Bind 22": "AC 22 Bind",
+          "AC Base 22": "AC 22 Base",
+          "AC 22 base-bind": "AC 22 Base/Bind"
+        },
+        "preserve_as_is": [
+          "AC Bind",
+          "STAB"
+        ],
+        "note": "最小必要的格式修正，AC Bind和STAB保持原样"
+      },
+      "structural_fields": {
+        "description": "建议新增3个结构化字段用于分析",
+        "fields": {
+          "tussenlaag_family": {
+            "description": "材料家族",
+            "values": ["AC", "STAB"],
+            "purpose": "分类统计不同材料体系"
+          },
+          "tussenlaag_gradation": {
+            "description": "粒径 (mm)",
+            "values": [16, 22, "unknown"],
+            "purpose": "分析粒径分布",
+            "note": "AC Bind保持unknown，不假设为16mm"
+          },
+          "tussenlaag_role": {
+            "description": "结构角色",
+            "values": {
+              "Bind": "纯中间层/粘结层",
+              "Base": "纯下面层",
+              "Base+Bind": "兼作中/下的混合层或通用层"
+            },
+            "decision_rules": {
+              "Bind": "名称含'Bind'或'TL-C'且不含'Base'",
+              "Base": "名称含'Base'且不含'Bind'",
+              "Base+Bind": "名称含'base-bind'或'OL/TL'或为'STAB'"
+            },
+            "purpose": "严格区分纯粘结层与混合功能层"
+          }
+        },
+        "usage_example": {
+          "filter_pure_binder": "SELECT * WHERE tussenlaag_role = 'Bind'",
+          "filter_hybrid": "SELECT * WHERE tussenlaag_role = 'Base+Bind'",
+          "group_by_gradation": "GROUP BY tussenlaag_gradation"
+        }
+      },
+      "data_quality_notes": {
+        "role_mixing": "字段中既有纯Binder也有Base，甚至有Base+Bind混合层",
+        "format_inconsistency": "格式不统一（AC Bind 22 vs AC 22 Bind）",
+        "gradation_unknown": "AC Bind粒径未知，保持unknown不做假设",
+        "stab_flexibility": "STAB可作中间层也可作下面层，具体角色需结合工程判断"
+      },
+      "typical_pavement_structure": {
+        "description": "典型荷兰路面结构（从上到下）",
+        "layers": [
+          {
+            "layer": "Deklaag (Surface/Wearing course)",
+            "typical": "ZOAB, DZOAB, SMA, AC Surf",
+            "field": "DEKLAAGSOORT (字段17)"
+          },
+          {
+            "layer": "Tussenlaag (Binder course)",
+            "typical": "AC 16 Bind, AC 22 Bind, AC 22 TL-C",
+            "field": "TUSSENLAAG (字段19) - 本字段"
+          },
+          {
+            "layer": "Onderlaag (Base course)",
+            "typical": "AC 22 Base, AC 22 OL-C, STAB",
+            "field": "未在当前数据中单独列出"
+          },
+          {
+            "layer": "Fundatie (Sub-base)",
+            "typical": "Granular materials",
+            "field": "未在当前数据中列出"
+          }
+        ],
+        "note": "某些情况下Tussenlaag与Onderlaag合并为一层（Base+Bind）"
+      },
+      "future_enhancement": {
+        "suggestion": "建立多行层状结构数据模型",
+        "concept": "每层一行记录（Deklaag / Tussenlaag / Onderlaag），形成完整的路面结构剖面",
+        "benefits": [
+          "清晰表达路面层状结构",
+          "便于层间关系分析",
+          "支持结构优化研究"
+        ]
+      },
+      "date_added": "2025-11-05",
+      "last_updated": "2025-11-05"
     },
     {
       "field_number": 20,

@@ -2720,7 +2720,7 @@ CREATE TABLE mixture_codes (
 
 ### 16. GRANULAIR MENGSEL (0/16, 4/8, 2/6, 0/11, 0/8 enz)
 
-**字段分类：** 🔵 非关键字段 (Non-Critical) _(从关键字段重新分类 - 2025-11-05)_
+**字段分类：** 🔴 关键字段 (Critical)
 **中文名称：** 骨料级配
 **英文名称：** Aggregate Gradation
 **数据类型：** string
@@ -2947,8 +2947,23 @@ CREATE TABLE aggregate_gradations (
 **必填：** 是（但8.3%缺失）
 **单位：** 无（类型分类）
 
-**含义：**
-道路面层（磨耗层）的沥青混合料类型。面层直接承受交通荷载和环境作用，其类型决定了路面的性能特征，如降噪、排水、抗滑、耐久性等。
+**📊 JSON定义（权威来源）：**
+```json
+{
+  "field_number": 17,
+  "field_name_nl": "DEKLAAGSOORT (bijv. ZOAB, SMA, tweelaags ZOAB, duurzaam ZOAB, etc.)",
+  "field_name_en": "Surface Layer Type",
+  "field_name_cn": "面层类型",
+  "data_type": "string",
+  "required": true,
+  "classification": "critical",
+  "category": "material_specification",
+  "validation_rules": {
+    "enum": ["ZOAB", "DZOAB", "SMA", "Tweelaags ZOAB", "Duurzaam ZOAB", "DAB", "PA", "Dunne deklagen"]
+  },
+  "description": "Type of surface layer (wearing course)"
+}
+```
 
 **📊 数据统计（基于1,592行真实数据）：**
 
@@ -2958,399 +2973,188 @@ CREATE TABLE aggregate_gradations (
 
 **📈 值分布（所有24个不同值）：**
 
-| 面层类型 | 次数 | 占比 | 家族分类 |
-|---------|------|------|----------|
-| `DZOAB` | 634 | 43.4% | ZOAB系列-耐久型 |
-| `ZOABTW TL` | 185 | 12.7% | ZOAB系列-双层上层 |
-| `ZOAB` | 179 | 12.3% | ZOAB系列-标准 |
-| `ZOABTW OL` | 132 | 9.0% | ZOAB系列-双层下层 |
-| `AC 16 Surf` | 89 | 6.1% | AC系列 |
-| `SMA` | 52 | 3.6% | SMA系列-标准 |
-| `ZOABDI` | 29 | 2.0% | ZOAB系列-薄层罩面 |
-| `ZOABTW` | 26 | 1.8% | ZOAB系列-双层(未指定层位) |
-| `ZOEAB` | 23 | 1.6% | ZOAB系列-乳化延寿层 |
-| `ZOABTW DL` | 21 | 1.4% | ZOAB系列-双层上层⚠️ |
-| `DGD` | 17 | 1.2% | 薄层养护类 |
-| `ZOABTW-fijn DL` | 15 | 1.0% | ZOAB系列-双层上层(fijn冗余) |
-| `SMA-NL 11B` | 13 | 0.9% | SMA系列-荷兰标准 |
+| 面层类型 | 次数 | 占比 | 分类 |
+|---------|------|------|------|
+| `DZOAB` | 634 | 43.4% | 密级配多孔沥青 ✅ |
+| `ZOABTW TL` | 185 | 12.7% | 双层ZOAB-表层 ✅ |
+| `ZOAB` | 179 | 12.3% | 多孔沥青 ✅ |
+| `ZOABTW OL` | 132 | 9.0% | 双层ZOAB-底层 ✅ |
+| `AC 16 Surf` | 89 | 6.1% | AC面层 ✅ |
+| `SMA` | 52 | 3.6% | 沥青玛蹄脂碎石 ✅ |
+| `ZOABDI` | 29 | 2.0% | 耐久ZOAB |
+| `ZOABTW` | 26 | 1.8% | 双层ZOAB |
+| `ZOEAB` | 23 | 1.6% | 特殊ZOAB变体？|
+| `ZOABTW DL` | 21 | 1.4% | 双层ZOAB-面层 |
+| `DGD` | 17 | 1.2% | 稀浆封层 |
+| `ZOABTW-fijn DL` | 15 | 1.0% | 细双层ZOAB |
+| `SMA-NL 11B` | 13 | 0.9% | SMA荷兰标准 |
 | `ZOAB ` | 13 | 0.9% | ⚠️ 尾随空格 |
-| `ZOAB+` | 6 | 0.4% | ZOAB系列-耐久型 |
+| `ZOAB+` | 6 | 0.4% | ZOAB改进型 |
 | `SMA-NL 11B ` | 5 | 0.3% | ⚠️ 尾随空格 |
-| `ZOABTW fijn OL` | 5 | 0.3% | ⚠️ 矛盾(fijn+OL) |
+| `ZOABTW fijn OL` | 5 | 0.3% | 细双层ZOAB-底层 |
 | `ZOABTW OL ` | 4 | 0.3% | ⚠️ 尾随空格 |
-| `SMA 8 Geel` | 4 | 0.3% | SMA系列-黄色⚠️ |
-| `AC 11 Surf` | 3 | 0.2% | AC系列 |
-| `SMA 8G+` | 2 | 0.1% | SMA系列-静音型 |
-| `SMA-NL 11` | 1 | 0.1% | SMA系列-荷兰标准 |
-| `SMA-NL 11B PMB SBS Bestone` | 1 | 0.1% | SMA系列-详细规格⚠️ |
-| `EAB` | 1 | 0.1% | 乳化养护类 |
+| `SMA 8 Geel` | 4 | 0.3% | 黄色SMA |
+| `AC 11 Surf` | 3 | 0.2% | AC面层 |
+| `SMA 8G+` | 2 | 0.1% | SMA改进型 |
+| `SMA-NL 11` | 1 | 0.1% | SMA荷兰标准 |
+| `SMA-NL 11B PMB SBS Bestone` | 1 | 0.1% | 详细规格 |
+| `EAB` | 1 | 0.1% | 特殊类型 |
 
-**🔍 面层命名结构解析：**
+**含义：**
+道路面层（磨耗层）的类型。面层直接承受交通荷载和环境作用，其类型决定了路面的性能特征，如降噪、排水、抗滑、耐久性等。
 
-DEKLAAGSOORT命名由多层信息组成：
+**🔍 主要面层类型详解：**
 
-1. **家族/结构类型** - ZOAB, DZOAB, SMA, AC, DGD, EAB等
-2. **层位标识** - DL(Deklaag上层), OL(Onderlaag下层), TL(Toplaag上层)
-3. **粒级/细度** - 8, 11, 16, fijn等
-4. **附加属性** - D/+耐久, NL荷兰标准, Geel黄色, G+静音等
+**ZOAB系列（多孔沥青）：** 43.4% + 12.3% + 12.7% + 9.0% = 77.4%
+- **DZOAB (Dicht ZOAB)** - 密级配多孔沥青，最常用（43.4%）
+- **ZOAB** - 标准多孔沥青（12.3%）
+- **ZOABTW (Tweelaags)** - 双层多孔沥青：
+  - TL (Toplaag/表层) - 12.7%
+  - OL (Onderlaag/底层) - 9.0%  
+  - DL (Deklaag/面层) - 1.4%
+- **ZOABDI (Duurzaam/Innovatief)** - 耐久/创新型ZOAB
 
-**📚 主要面层类型家族详解：**
+**SMA系列（沥青玛蹄脂碎石）：** 3.6%
+- **SMA** - 标准SMA（3.6%）
+- **SMA-NL 11B** - 荷兰标准11B型（0.9%）
+- **SMA 8 Geel** - 8mm黄色SMA（用于标识）
 
-#### 1️⃣ ZOAB系列 (多孔沥青) - 77.4%总占比
+**AC系列（致密级配沥青混凝土）：** 6.1%
+- **AC 16 Surf** - 16mm AC面层（6.1%）
+- **AC 11 Surf** - 11mm AC面层（0.2%）
 
-**DZOAB (Duurzaam Zeer Open Asfaltbeton)**
-- 中文名：耐久多孔沥青
-- 占比：43.4% (最常用)
-- 结构：单层
-- 特性：耐久型、改进版ZOAB，仍然是高空隙(zeer open)结构
-- 等价：DZOAB ≈ ZOAB+ (都是耐久型)
+**⚠️ 数据质量问题：**
 
-**ZOAB (Zeer Open Asfaltbeton)**
-- 中文名：标准多孔沥青
-- 占比：12.3%
-- 结构：单层
-- 用途：常规高速主线排水降噪
-- 注意：数据中"ZOAB"和"ZOAB "(带空格)应归为同一类
+**问题1：尾随空格**
+- "ZOAB " vs "ZOAB"（13次带空格）
+- "SMA-NL 11B " vs "SMA-NL 11B"（5次带空格）
+- "ZOABTW OL " vs "ZOABTW OL"（4次带空格）
+- 需要trim处理
 
-**ZOABTW (Tweelaags ZOAB) - 双层多孔沥青系统**
-- 中文名：双层多孔沥青
-- 占比：12.7%(TL) + 9.0%(OL) + 1.4%(DL) + 1.8%(无后缀) = 24.9%
-- 结构：双层系统(上层细级配 + 下层粗级配)
-
-层位标识：
-- **TL** (推测 = Toplaag) - 上层面层，细级配 (185次, 12.7%) ⚠️ 需确认
-- **OL** (Onderlaag) - 下层面层，粗级配 (132次, 9.0%) ✅ 确认
-- **DL** (Deklaag) - 上层面层(推测等同于Toplaag) (21次, 1.4%) ⚠️ 需确认
-- **(无后缀)** - 未指定层位 (26次, 1.8%)
-
-冗余标注处理：
-- ZOABTW-fijn DL ≈ ZOABTW DL (fijn在上层是冗余信息)
-- ZOABTW fijn ≈ ZOABTW (泛指)
-- ZOABTW fijn OL ≈ ZOABTW OL (但存在矛盾：fijn与OL通常不匹配) ⚠️
-
-**ZOABDI (ZOAB - Dunne Inlage)**
-- 中文名：ZOAB薄层罩面
-- 占比：2.0%
-- 结构：薄层罩面(Dunne Inlage)
-- 功能：在旧ZOAB上加铺薄层嵌补/罩面，改良表面、抗剥落、延长寿命
-- 特点：具有ZOAB空隙与纹理，结构上接近DGD类薄层降噪罩面
-- 分类：独立类别，不等同于ZOABTW DL
-
-**ZOEAB (Zeer Open Emulsie Asfaltbeton)**
-- 中文名：ZOAB寿命延长层(高空隙乳化罩面)
-- 占比：1.6%
-- 结构：乳化沥青罩面
-- 功能：高空隙乳化沥青混凝土，专门做在旧ZOAB上延长寿命
-  - 修复轻度剥落的ZOAB
-  - 恢复纹理
-  - 封闭和延寿
-- 分类：乳化沥青养护类
-
-#### 2️⃣ SMA系列 (沥青玛蹄脂碎石) - 5.2%总占比
-
-**SMA (Stone Mastic Asphalt)**
-- 中文名：标准SMA面层
-- 占比：3.6%
-- 特点：玛蹄脂骨架、抗车辙好
-
-**SMA-NL 11B / SMA-NL 11**
-- 中文名：荷兰标准SMA面层
-- 占比：0.9% + 0.1% = 1.0%
-- 标准：荷兰标准系列
-- 粒径：11mm
-- 配方：11B为B型配方，11为未细分A/B型
-
-**SMA 8G+**
-- 中文名：8mm静音型SMA(G+变型)
-- 占比：0.1%
-- 粒径：8mm
-- 特性：G+型降噪SMA，专门调成更安静
-
-**SMA 8 Geel**
-- 中文名：黄色8mm SMA
-- 占比：0.3%
-- 粒径：8mm
-- 颜色：Geel (黄色)
-- ⚠️ 待确认：是否有特殊声学性能？是否有标准配方？还是仅项目自定义着色？
-
-**SMA-NL 11B PMB SBS Bestone**
-- 中文名：改性SMA-NL 11B
-- 占比：0.1%
-- 基础型：SMA-NL 11B
-- 改性剂：PMB (聚合物改性沥青), SBS (SBS改性剂), Bestone (特定石料品牌)
-- ⚠️ 建议：PMB/SBS/Bestone应分离到材料属性字段(字段15或新字段)
-
-#### 3️⃣ AC系列 (致密级配沥青混凝土) - 6.3%总占比
-
-**AC 16 Surf / AC 11 Surf**
-- 中文名：AC面层
-- 占比：6.1% + 0.2% = 6.3%
-- 结构：Asfaltbeton (致密沥青混凝土)
-- 粒径：16mm / 11mm (最大粒径)
-- 层位：Surf = Surface (表层)
-- 用途：不要求降噪的路段
-- 分类：非多孔、常规AC面层
-
-#### 4️⃣ 薄层与乳化养护类 - 1.3%总占比
-
-**DGD (Dunne Geluidreducerende Deklaag)**
-- 中文名：薄层降噪面层
-- 占比：1.2%
-- 结构：薄层
-- 用途：省道、市政道路以及作为ZOAB的替代型静音面层
-
-**EAB (Emulsie Asfaltbeton)**
-- 中文名：乳化沥青混凝土(冷拌养护层)
-- 占比：0.1%
-- 结构：冷拌
-- 特性：冷拌、节能
-- 用途：车辙修复、旧路表面翻新、纹理恢复
-- 分类：乳化/冷拌养护面层
-
-**🚨 数据质量问题：**
-
-**问题1：尾随空格 (22次, 1.5%)**
+**问题2：TL/OL/DL后缀不统一**
 ```
-"ZOAB " vs "ZOAB"      (13次带空格)
-"SMA-NL 11B " vs "SMA-NL 11B"  (5次带空格)
-"ZOABTW OL " vs "ZOABTW OL"    (4次带空格)
+ZOABTW TL  - 185次 (Toplaag/表层)
+ZOABTW OL  - 132次 (Onderlaag/底层)
+ZOABTW DL  - 21次  (Deklaag/面层)
+ZOABTW     - 26次  (无后缀)
 ```
-**处理：** 需要trim()标准化
+- 需确认：TL和DL是否相同？
+- 26次无后缀ZOABTW缺少层位信息
 
-**问题2：ZOABTW层位标识不一致**
-```
-ZOABTW TL  - 185次 (推测=Toplaag上层)  ⚠️ 需确认
-ZOABTW DL  - 21次  (推测=Deklaag上层)  ⚠️ 需确认
-ZOABTW OL  - 132次 (=Onderlaag下层)    ✅ 确认
-ZOABTW     - 26次  (无后缀，缺少层位信息)
-```
-**关键问题：**
-- TL 是 Toplaag(上层) 还是 Tussenlaag(中间层/结合层)？
-- DL 是否真的等同于 Toplaag(上层)？
-- 如果 DL = TL = Toplaag，则应归为同一类
+**问题3：变体命名**
+- "ZOAB+" - 是ZOAB的改进型？还是数据错误？
+- "SMA 8G+" - "G"表示Geel（黄色）？"+"表示改进型？
+- "ZOEAB" vs "ZOAB" - 拼写错误还是特殊类型？
 
-**问题3：ZOABTW fijn OL 的矛盾 (5次, 0.3%)**
-- OL (Onderlaag/下层) 通常为粗级配
-- fijn 表示细级配
-- 矛盾：细级配却标注为下层
-- ⚠️ 需确认：是数据错误还是特殊配置？
+**问题4：过度详细规格**
+- "SMA-NL 11B PMB SBS Bestone" - 包含了改性剂和供应商信息
+- 应该简化为"SMA-NL 11B"？
 
-**问题4：变体命名**
-- "ZOAB+" - 耐久型改进版(等同于DZOAB)
-- "SMA 8G+" - G+型静音SMA
-- "ZOEAB" - 高空隙乳化罩面(非拼写错误)
+**数据清洗建议：**
 
-**问题5：过度详细规格**
-- "SMA-NL 11B PMB SBS Bestone" - 包含改性剂和供应商信息
-- 建议：基础类型(SMA-NL 11B)和材料属性(PMB/SBS/Bestone)应分离存储
-
-**🛠️ 数据清洗建议：**
-
-**1️⃣ 去除尾随空格：**
+**1️⃣ 去除空格：**
 ```python
 df['DEKLAAGSOORT'] = df['DEKLAAGSOORT'].str.strip()
 ```
 
-**2️⃣ 标准化ZOABTW层位标识（待Leon确认后执行）：**
+**2️⃣ 标准化ZOABTW后缀：**
 ```python
-# 如果确认 DL = TL = Toplaag
+# 统一TL/DL为Toplaag
 df['DEKLAAGSOORT'] = df['DEKLAAGSOORT'].replace({
-    'ZOABTW DL': 'ZOABTW TL',
-    'ZOABTW-fijn DL': 'ZOABTW TL'  # fijn在上层是冗余
+    'ZOABTW DL': 'ZOABTW TL',  # 如果DL=TL
+    'ZOABTW-fijn DL': 'ZOABTW fijn TL'
 })
 ```
 
-**3️⃣ 统一耐久型ZOAB：**
+**3️⃣ 简化详细规格：**
 ```python
-df['DEKLAAGSOORT'] = df['DEKLAAGSOORT'].replace({
-    'ZOAB+': 'DZOAB'  # 都是耐久型
-})
-```
-
-**4️⃣ 提取基础类型和材料属性：**
-```python
-# 分离材料属性
-df['base_surface_type'] = df['DEKLAAGSOORT'].str.extract(
-    r'(DZOAB|ZOAB|SMA|AC \d+ Surf|DGD|EAB|ZOABTW)'
-)[0]
-
-# 提取改性剂信息（可选）
-df['modifiers'] = df['DEKLAAGSOORT'].str.extract(
-    r'(PMB|SBS|Bestone)'
+# 提取主要类型
+df['DEKLAAGSOORT_simplified'] = df['DEKLAAGSOORT'].str.extract(
+    r'(DZOAB|ZOAB|SMA|AC \d+ Surf|DGD|EAB)'
 )[0]
 ```
 
-**💾 数据处理流程：**
+**数据处理流程：**
 
+**1️⃣ 输入和标准化：**
 ```python
-import pandas as pd
-
-# 1️⃣ 读取数据
 df = pd.read_excel('template.xlsx', dtype={'DEKLAAGSOORT': str})
+df['DEKLAAGSOORT'] = df['DEKLAAGSOORT'].str.strip().str.upper()
+```
 
-# 2️⃣ 基础清洗
-df['DEKLAAGSOORT'] = (
-    df['DEKLAAGSOORT']
-    .str.strip()           # 去除空格
-    .str.upper()           # 统一大写(可选)
-)
-
-# 3️⃣ 定义面层家族
-surface_families = {
-    'ZOAB_durable': ['DZOAB', 'ZOAB+'],
-    'ZOAB_standard': ['ZOAB'],
-    'ZOAB_tweelaags': ['ZOABTW TL', 'ZOABTW OL', 'ZOABTW DL', 'ZOABTW'],
-    'ZOAB_special': ['ZOABDI', 'ZOEAB'],
-    'SMA': ['SMA', 'SMA-NL', 'SMA 8G+', 'SMA 8 Geel'],
+**2️⃣ 验证与分类：**
+```python
+# 定义主要类型
+main_types = {
+    'ZOAB': ['DZOAB', 'ZOAB', 'ZOABTW', 'ZOABDI', 'ZOEAB'],
+    'SMA': ['SMA', 'SMA-NL'],
     'AC': ['AC 11 Surf', 'AC 16 Surf'],
-    'thin_layer': ['DGD'],
-    'emulsion': ['EAB']
+    'Other': ['DGD', 'EAB']
 }
 
-# 4️⃣ 分配家族
-def assign_family(deklaagsoort):
-    for family, patterns in surface_families.items():
-        for pattern in patterns:
-            if pattern in str(deklaagsoort):
-                return family
-    return 'unknown'
-
-df['surface_family'] = df['DEKLAAGSOORT'].apply(assign_family)
-
-# 5️⃣ 验证与GRANULAIR MENGSEL的一致性
-# ZOAB系列应配合PA级配
-zoab_check = df[
-    (df['surface_family'].str.contains('ZOAB', na=False)) &
-    (~df['GRANULAIR MENGSEL'].str.contains('PA', na=False, case=False))
-]
-print(f"⚠️ ZOAB类型但非PA级配: {len(zoab_check)} 行")
+# 分类
+for main_type, variants in main_types.items():
+    mask = df['DEKLAAGSOORT'].str.contains('|'.join(variants), na=False)
+    df.loc[mask, 'surface_type_category'] = main_type
 ```
 
-**📋 数据验证规则：**
-
+**3️⃣ 与其他字段关联：**
 ```python
-# 验证1：DEKLAAGSOORT不能为空
-assert df['DEKLAAGSOORT'].notna().sum() / len(df) > 0.9, \
-    "DEKLAAGSOORT缺失率过高"
-
-# 验证2：尾随空格检查
-trailing_spaces = df['DEKLAAGSOORT'].str.endswith(' ', na=False).sum()
-assert trailing_spaces == 0, \
-    f"发现{trailing_spaces}行数据有尾随空格"
-
-# 验证3：ZOAB系列应配PA级配
-zoab_mask = df['DEKLAAGSOORT'].str.contains('ZOAB', na=False, case=False)
-zoab_without_pa = df[zoab_mask & ~df['GRANULAIR MENGSEL'].str.contains('PA', na=False, case=False)]
-if len(zoab_without_pa) > 0:
-    print(f"⚠️ 警告：{len(zoab_without_pa)}行ZOAB类型未使用PA级配")
-
-# 验证4：未识别的面层类型
-known_types = ['DZOAB', 'ZOAB', 'ZOABTW', 'ZOABDI', 'ZOEAB', 
-               'SMA', 'AC', 'DGD', 'EAB']
-unknown = df[~df['DEKLAAGSOORT'].str.contains('|'.join(known_types), na=False, case=False)]
-if len(unknown) > 0:
-    print(f"⚠️ 警告：{len(unknown)}行未识别的面层类型")
-    print(unknown['DEKLAAGSOORT'].unique())
+# ZOAB类型应该配合PA级配
+zoab_pa_check = df[
+    (df['DEKLAAGSOORT'].str.contains('ZOAB', na=False)) &
+    (~df['GRANULAIR MENGSEL'].str.contains('PA', na=False))
+]
+print(f"ZOAB类型但非PA级配: {len(zoab_pa_check)} 行")
 ```
 
-**🗄️ 数据库设计建议：**
-
+**数据库设计：**
 ```sql
--- 面层类型参考表
-CREATE TABLE surface_layer_types (
-    type_code VARCHAR(100) PRIMARY KEY,
-    family VARCHAR(50) NOT NULL,          -- ZOAB, SMA, AC, thin_layer, emulsion
-    structure VARCHAR(50),                -- single, two_layer, thin_overlay, etc.
-    gradation VARCHAR(20),                -- 8, 11, 16, fijn, standard
-    features VARCHAR(100),                -- durable, low_noise, colored_geel, etc.
-    is_porous BOOLEAN NOT NULL,
+CREATE TABLE surface_types (
+    type_code VARCHAR(50) PRIMARY KEY,
+    main_category VARCHAR(20), -- 'ZOAB', 'SMA', 'AC', 'Other'
+    is_porous BOOLEAN,
     is_noise_reducing BOOLEAN,
-    typical_void_content DECIMAL(5,2),    -- 空隙率%
+    typical_gradation VARCHAR(20),
     description_nl TEXT,
-    description_en TEXT,
-    description_cn TEXT
+    description_en TEXT
 );
 
--- 道路段表（外键关联）
 CREATE TABLE road_segments (
-    segment_id INT PRIMARY KEY,
-    deklaagsoort VARCHAR(100) NOT NULL,
-    
-    -- 外键约束
-    FOREIGN KEY (deklaagsoort) 
-        REFERENCES surface_layer_types(type_code)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-    
-    -- 检查约束
-    CONSTRAINT chk_deklaagsoort_not_empty 
-        CHECK (TRIM(deklaagsoort) <> '')
-);
+    deklaagsoort VARCHAR(50),
 
--- 插入标准面层类型（示例）
-INSERT INTO surface_layer_types VALUES
-('DZOAB', 'ZOAB', 'single', 'standard', 'durable', TRUE, TRUE, 20.0, 
- 'Duurzaam Zeer Open Asfaltbeton', 'Durable Porous Asphalt', '耐久多孔沥青'),
-('ZOAB', 'ZOAB', 'single', 'standard', 'standard', TRUE, TRUE, 20.0,
- 'Zeer Open Asfaltbeton', 'Porous Asphalt', '标准多孔沥青'),
-('ZOABTW TL', 'ZOAB', 'two_layer_top', 'fijn', 'standard', TRUE, TRUE, 20.0,
- 'Tweelaags ZOAB Toplaag', 'Two-layer Porous Asphalt Top', '双层多孔沥青-上层'),
-('ZOABTW OL', 'ZOAB', 'two_layer_bottom', 'grof', 'standard', TRUE, TRUE, 20.0,
- 'Tweelaags ZOAB Onderlaag', 'Two-layer Porous Asphalt Bottom', '双层多孔沥青-下层');
+    FOREIGN KEY (deklaagsoort) REFERENCES surface_types(type_code),
+    CHECK (deklaagsoort IS NOT NULL)
+);
 ```
 
-**❓ 需要与Leon确认的关键问题：**
+**❓ 待与Leon确认的问题：**
 
-**🔴 高优先级（影响数据分类）：**
+1. **ZOABTW后缀含义：**
+   - TL (Toplaag) vs DL (Deklaag) - 是否相同？
+   - 26次无后缀的ZOABTW应该归类为哪一层？
 
-1. **ZOABTW DL 的含义** (VERIFY-DL-01)
-   - 问题：DL (Deklaag) 是否真的等同于 Toplaag (上层面层)？
-   - 当前假设：DL = 上层
-   - 影响：如果正确，则 ZOABTW DL ≈ ZOABTW TL (都是上层)
-   - 数据量：21行 (1.4%)
+2. **变体含义：**
+   - "ZOAB+" 是什么？改进型ZOAB？
+   - "ZOEAB" - 拼写错误还是特殊类型？
+   - "DGD" 的全称是什么？
 
-2. **ZOABTW TL 的含义** (VERIFY-TL-01)
-   - 问题：TL 是 Toplaag (上层) 还是 Tussenlaag (中间层/结合层)？
-   - 当前假设：TL = Toplaag (上层)
-   - 备选假设：TL = Tussenlaag (中间层)
-   - 影响：如果是Tussenlaag，意义完全不同（结合层而非面层）
-   - 数据量：185行 (12.7%)
+3. **SMA规格：**
+   - "SMA 8 Geel" 黄色SMA的用途？
+   - "SMA-NL 11B" 中的"11B"规格含义？
 
-3. **ZOABTW fijn OL 的矛盾** (VERIFY-ZOABTW-01)
-   - 问题：数据中出现"ZOABTW fijn OL"，但OL(下层)通常是粗级配，fijn表示细级配，这是数据错误还是特殊配置？
-   - 矛盾点：fijn (细级配) vs OL (下层应为粗级配)
-   - 数据量：5行 (0.3%)
+4. **标准化策略：**
+   - 是否建立标准面层类型列表？
+   - 过度详细的规格是否应简化？
+   - 尾随空格应如何处理（自动清理还是报错）？
 
-**⚠️ 中低优先级（影响分类细节）：**
-
-4. **SMA 8 Geel 的性能特性** (VERIFY-SMA-01)
-   - 问题：SMA 8 Geel 除了黄色外，是否有特殊声学性能？是否有标准配方？
-   - 当前认知：仅确认8mm粒径 + 黄色
-   - 数据量：4行 (0.3%)
-
-5. **材料属性分离建议** (SUGGEST-01)
-   - 问题：SMA-NL 11B PMB SBS Bestone
-   - 建议：将PMB/SBS/Bestone等材料属性分离到字段15 (MENGSELCODE) 或创建新的材料属性字段
-   - 理由：这些是沥青改性剂和石料品牌，不是面层类型本身
-   - 数据量：1行 (0.1%)
-
-**📖 参考来源：**
-
-- 📄 config/field_mapping_2022.json - 字段17完整定义
-- 📄 Analysis/DEKLAAGSOORT_Standardization_Framework.md - 四维分类框架
-- 📊 真实数据统计 - 1,592行Template 2022数据
+**参考来源：**
+- 📄 config/field_mapping_2022.json - 字段定义
+- 📊 Analysis/Template_2022_Field_Analysis_OLD.md (lines 1120-1191) - 真实数据统计
 - 📖 RAW Bepalingen - 荷兰道路技术规范
 - 📖 CROW Publicatie 147 - ZOAB设计和施工指南
-- 💬 用户提供的详细分类规则 (2025-11-05)
-
-**🔗 字段关联：**
-
-- **MENGSELCODE (字段15)** - 应包含材料改性信息(PMB/SBS等)
-- **GRANULAIR MENGSEL (字段16)** - ZOAB系列应配PA级配
-- **DIKTE VERHARDING (字段18)** - 面层厚度与面层类型相关
 
 
----
 ---
 
 ### 18. DIKTE VERHARDING
@@ -3560,35 +3364,27 @@ CREATE TABLE road_segments (
 ### 19. TUSSENLAAG
 
 **字段分类：** 🔵 非关键字段 (Non-Critical)
-**中文名称：** 中间层/粘结层
+**中文名称：** 中间层 / 粘结层
 **英文名称：** Binder Course / Intermediate Layer
 **数据类型：** string
 **必填：** 否（条件必填）
 **单位：** 无（层型描述）
 
-**含义：**
-TUSSENLAAG是路面结构中介于面层(Deklaag)和基层(Onderlaag)之间的中间层/粘结层(Binder Course)。可以是纯粘结层(Bind)、纯基层(Base)或兼具双重作用的混合层(Base+Bind)。
-
-**路面典型四层结构（由上至下）：**
-```
-1. Deklaag (Surface/Wearing Course)   - 面层/磨耗层 [字段17]
-2. Tussenlaag (Binder/Intermediate)   - 中间层/粘结层 [字段19] ⬅ 本字段
-3. Onderlaag (Base Course)            - 基层
-4. Fundatie (Sub-base/Foundation)      - 垫层/底基层
-```
-
-**📊 JSON定义（权威来源 - 已更新）：**
+**📊 JSON定义（权威来源）：**
 ```json
 {
   "field_number": 19,
   "field_name_nl": "TUSSENLAAG",
-  "field_name_en": "Binder Course / Intermediate Layer",
-  "field_name_cn": "中间层/粘结层",
+  "field_name_en": "Binder Course",
+  "field_name_cn": "中间层",
   "data_type": "string",
   "required": false,
   "classification": "non-critical",
   "category": "material_specification",
-  "description": "Binder course (intermediate layer) between surface layer (deklaag) and base layer (onderlaag). Can be pure binder, pure base, or hybrid base+bind layer."
+  "validation_rules": {
+    "enum": ["Ja", "Nee", ""]
+  },
+  "description": "Whether a binder course (intermediate layer) is present"
 }
 ```
 
@@ -3600,237 +3396,97 @@ TUSSENLAAG是路面结构中介于面层(Deklaag)和基层(Onderlaag)之间的�
 
 **📈 值分布（所有8个不同值）：**
 
-| 原始值 | 次数 | 占比 | 标准名称 | 家族 | 粒径 | 结构作用 |
-|--------|------|------|----------|------|------|----------|
-| `AC 16 Bind` | 140 | 63.3% | AC 16 Bind | AC | 16mm | Bind（粘结层） ✅ |
-| `AC Bind` | 33 | 14.9% | AC Bind | AC | unknown | Bind（粘结层） ⚠️ |
-| `AC Base 22` | 18 | 8.1% | AC 22 Base | AC | 22mm | Base（基层） |
-| `STAB` | 14 | 6.3% | STAB | STAB | - | Base+Bind（混合） |
-| `AC Bind 22` | 8 | 3.6% | AC 22 Bind | AC | 22mm | Bind（粘结层） |
-| `AC 22 base-bind` | 4 | 1.8% | AC 22 Base/Bind | AC | 22mm | Base+Bind（混合） |
-| `AC 16 OL/TL` | 3 | 1.4% | AC 16 OL/TL | AC | 16mm | Base+Bind（通用） |
-| `AC 22 TL-C` | 1 | 0.5% | AC 22 TL-C | AC | 22mm | Bind-Coarse（粗粒粘结层） |
+| TUSSENLAAG类型 | 次数 | 占比 | 说明 |
+|---------------|------|------|------|
+| `AC 16 Bind` | 140 | 63.3% | AC16粘结层 ✅ |
+| `AC Bind` | 33 | 14.9% | AC粘结层 ✅ |
+| `AC Base 22` | 18 | 8.1% | AC22基层 |
+| `STAB` | 14 | 6.3% | 稳定层？|
+| `AC Bind 22` | 8 | 3.6% | AC22粘结层 |
+| `AC 22 base-bind` | 4 | 1.8% | AC22基粘结层 |
+| `AC 16 OL/TL` | 3 | 1.4% | AC16底层/表层 |
+| `AC 22 TL-C` | 1 | 0.5% | AC22表层-C型 |
 
-**注：** 86.1%的工程没有中间层是正常的，取决于路面结构设计和交通荷载需求。
+**含义：**
+面层和基层之间的中间层（粘结层/结合层）。并非所有工程都有中间层，取决于路面结构设计。86.1%的工程没有中间层是正常的。
 
-**🔍 TUSSENLAAG类型详解：**
+**🔍 数据分析：**
 
-#### 1️⃣ AC 16 Bind - 标准粘结层（最常见）
-- **次数：** 140 (63.3%)
-- **完整名称：** Asfaltbeton 16mm Binder Course
-- **家族：** AC (致密沥青混凝土)
-- **粒径：** 16mm
-- **结构作用：** Bind (纯粘结层)
-- **功能：** 连接面层和基层，传递荷载，防止层间滑移
-- **典型位置：** 面层下方第一层
+**有中间层的工程：** 221行 (13.9%)
+- **AC Bind系列（粘结层）：** 181行 (81.9%)
+  - AC 16 Bind - 140行（最常见）
+  - AC Bind - 33行（未指定级配）
+  - AC Bind 22 - 8行
+  
+- **AC Base系列（基层）：** 18行 (8.1%)
+  - AC Base 22 - 18行
+  - AC 22 base-bind - 4行
+  
+- **其他类型：** 22行 (10.0%)
+  - STAB - 14行（稳定层）
+  - AC 16 OL/TL - 3行
+  - AC 22 TL-C - 1行
 
-#### 2️⃣ AC Bind - 未知粒径粘结层（⚠️ 需确认）
-- **次数：** 33 (14.9%)
-- **完整名称：** Asfaltbeton Binder Course (gradation unknown)
-- **家族：** AC
-- **粒径：** **unknown** (可能是16mm或22mm，但**不做假设**)
-- **结构作用：** Bind (纯粘结层)
-- **数据质量：** 规格不完整，需要承包商补充
-
-#### 3️⃣ AC 22 Bind - 粗粒径粘结层
-- **次数：** 8 (3.6%)
-- **标准名称：** AC 22 Bind (格式修正: "AC Bind 22" → "AC 22 Bind")
-- **家族：** AC
-- **粒径：** 22mm
-- **结构作用：** Bind (纯粘结层)
-- **用途：** 重载路段、较厚路面结构
-
-#### 4️⃣ AC 22 Base - 纯基层（在中间层位置）
-- **次数：** 18 (8.1%)
-- **标准名称：** AC 22 Base (格式修正: "AC Base 22" → "AC 22 Base")
-- **家族：** AC
-- **粒径：** 22mm
-- **结构作用：** **Base (纯基层)**
-- **特殊性：** 虽然在TUSSENLAAG字段，但实际是基层材料
-- **说明：** 可能是薄结构路面，中间层直接采用基层混合料
-
-#### 5️⃣ AC 22 Base/Bind - 兼作中/下层的混合层
-- **次数：** 4 (1.8%)
-- **标准名称：** AC 22 Base/Bind (格式修正: "AC 22 base-bind" → "AC 22 Base/Bind")
-- **家族：** AC
-- **粒径：** 22mm
-- **结构作用：** **Base+Bind (混合层)**
-- **结构概念：** 一层同时承担Base(基层)和Bind(粘结层)的双重作用
-- **用途：** 中等厚度路面结构，减少层数
-
-#### 6️⃣ AC 16 OL/TL - 通用层（可作基层或粘结层）
-- **次数：** 3 (1.4%)
-- **完整名称：** AC 16 Onderlaag/Tussenlaag (Base/Binder universal layer)
-- **家族：** AC
-- **粒径：** 16mm
-- **结构作用：** **Base+Bind (通用层)**
-- **灵活性：** OL/TL表示可用作onderlaag(基层)也可用作tussenlaag(粘结层)
-- **用途：** 薄层结构，简化层位划分
-
-#### 7️⃣ AC 22 TL-C - 粗粒径粘结层（C型）
-- **次数：** 1 (0.5%)
-- **完整名称：** AC 22 Tussenlaag - Coarse
-- **家族：** AC
-- **粒径：** 22mm
-- **结构作用：** Bind (粘结层)
-- **特殊性：** C = Coarse (粗级配)，强调粗粒径特性
-
-#### 8️⃣ STAB - 高稳定性沥青混凝土
-- **次数：** 14 (6.3%)
-- **完整名称：** Steenslagasfaltbeton (Stone Mastic Asphalt Beton)
-- **家族：** STAB (独立家族)
-- **粒径：** -
-- **结构作用：** **Base+Bind (混合层)**
-- **特性：** 高稳定性、抗车辙、骨架密实
-- **结构灵活性：** 可用作tussenlaag，也可用作onderlaag
-- **用途：** 重载路段、高强度要求
-
-**📐 三维结构分析字段（用于数据分析）：**
-
-为了更好地分析和分类TUSSENLAAG数据，建议添加以下三个派生字段：
-
-**1. tussenlaag_family** (家族分类)
-- **取值：** `AC` | `STAB`
-- **含义：** 混合料类型家族
-- **提取规则：**
-  - 包含"AC" → `AC`
-  - 等于"STAB" → `STAB`
-
-**2. tussenlaag_gradation** (粒径级配)
-- **取值：** `16` | `22` | `unknown`
-- **含义：** 最大粒径(mm)
-- **提取规则：**
-  - 包含"16" → `16`
-  - 包含"22" → `22`
-  - "AC Bind"且无数字 → `unknown` **(不假设为16mm)**
-
-**3. tussenlaag_role** (结构作用)
-- **取值：** `Bind` | `Base` | `Base+Bind`
-- **含义：** 在路面结构中的作用
-- **决策规则：**
-  - 名称含"Bind"或"TL-C"且不含"Base" → `Bind` (纯粘结层)
-  - 名称含"Base"且不含"Bind" → `Base` (纯基层)
-  - 名称含"base-bind"或"OL/TL"或为"STAB" → `Base+Bind` (混合层)
+**无中间层的工程：** 1371行 (86.1%)
 
 **⚠️ 数据质量问题：**
 
-**问题1：命名格式不统一（需要标准化）**
+**问题1：JSON定义与实际数据不符**
+- **JSON规定：** enum = ["Ja", "Nee", ""]
+- **实际数据：** 具体层型名称（AC 16 Bind等）
+- **不一致：** JSON期望Yes/No，实际是详细规格
+
+**问题2：命名不统一**
 ```
-原始格式          → 标准格式
-"AC Bind 22"      → "AC 22 Bind"     (粒径应在中间)
-"AC Base 22"      → "AC 22 Base"     (粒径应在中间)
-"AC 22 base-bind" → "AC 22 Base/Bind" (斜杠更清晰)
+"AC 16 Bind"  - 完整规格（级配+层型）
+"AC Bind"     - 未指定级配
+"AC Bind 22"  - 级配在后
 ```
+- 需要标准化命名规则
 
-**问题2：AC Bind 粒径缺失（33行，14.9%）**
-- "AC Bind" 未指定粒径（可能是16mm或22mm）
-- **重要：** 保持 `unknown`，不要假设为16mm
-- 需要承包商补充完整规格
+**问题3：Base vs Bind混淆**
+- AC 16 Bind - "Bind"通常指粘结层（Binder Course）
+- AC Base 22 - "Base"通常指基层（Base Course）
+- 是否应该区分两种不同的层？
 
-**问题3：Base vs Bind 概念混用**
-- AC 22 Base 虽然出现在 TUSSENLAAG字段，但实际是基层材料
-- AC 22 Base/Bind 和 AC 16 OL/TL 兼具双重作用
-- 需要通过 `tussenlaag_role` 字段明确区分
+**问题4：特殊缩写**
+- "STAB" - 含义不明确（Stabilization? Stab层？）
 
-**🛠️ 数据清洗建议：**
+**数据清洗建议：**
 
-**1️⃣ 标准化命名格式：**
+**1️⃣ 标准化命名：**
 ```python
-# 统一命名格式：AC [粒径] [层型]
-# ⚠️ 注意：AC Bind 保持不变，不假设为 AC 16 Bind
+# 统一命名格式：AC [级配] [层型]
 standardize_map = {
-    'AC Bind 22': 'AC 22 Bind',           # 粒径前移
-    'AC Base 22': 'AC 22 Base',           # 粒径前移
-    'AC 22 base-bind': 'AC 22 Base/Bind', # 统一斜杠
-    # 'AC Bind': 'AC Bind',                # 保持原样，不假设粒径
+    'AC Bind': 'AC 16 Bind',  # 假设默认16
+    'AC Bind 22': 'AC 22 Bind',
+    'AC Base 22': 'AC 22 Base',
+    'AC 22 base-bind': 'AC 22 Base-Bind'
 }
 
-df['TUSSENLAAG_standardized'] = df['TUSSENLAAG'].replace(standardize_map)
+df['TUSSENLAAG'] = df['TUSSENLAAG'].replace(standardize_map)
 ```
 
-**2️⃣ 提取三维结构字段：**
+**2️⃣ 提取层型和级配：**
 ```python
-import pandas as pd
+# 提取级配
+df['tussenlaag_gradation'] = df['TUSSENLAAG'].str.extract(r'(\d+)')
 
-def extract_tussenlaag_family(value):
-    """提取家族：AC 或 STAB"""
-    if pd.isna(value):
-        return None
-    if 'STAB' in str(value):
-        return 'STAB'
-    if 'AC' in str(value):
-        return 'AC'
-    return 'unknown'
-
-def extract_tussenlaag_gradation(value):
-    """提取粒径：16, 22, 或 unknown"""
-    if pd.isna(value):
-        return None
-    value_str = str(value)
-    if '22' in value_str:
-        return 22
-    if '16' in value_str:
-        return 16
-    # 关键：AC Bind 不假设为16，保持 unknown
-    if 'AC Bind' in value_str and not any(c.isdigit() for c in value_str):
-        return 'unknown'
-    return 'unknown'
-
-def extract_tussenlaag_role(value):
-    """提取结构作用：Bind, Base, 或 Base+Bind"""
-    if pd.isna(value):
-        return None
-    value_str = str(value)
-
-    # STAB 总是 Base+Bind
-    if value_str == 'STAB':
-        return 'Base+Bind'
-
-    # OL/TL 表示通用层
-    if 'OL/TL' in value_str:
-        return 'Base+Bind'
-
-    # base-bind 表示混合层
-    if 'base-bind' in value_str.lower():
-        return 'Base+Bind'
-
-    # 只有 Bind 没有 Base
-    if 'Bind' in value_str and 'Base' not in value_str:
-        return 'Bind'
-
-    # 只有 Base 没有 Bind
-    if 'Base' in value_str and 'Bind' not in value_str:
-        return 'Base'
-
-    # TL-C 表示粘结层
-    if 'TL-C' in value_str:
-        return 'Bind'
-
-    return 'unknown'
-
-# 应用提取函数
-df['tussenlaag_family'] = df['TUSSENLAAG'].apply(extract_tussenlaag_family)
-df['tussenlaag_gradation'] = df['TUSSENLAAG'].apply(extract_tussenlaag_gradation)
-df['tussenlaag_role'] = df['TUSSENLAAG'].apply(extract_tussenlaag_role)
-
-# 验证结果
-print("家族分布：")
-print(df['tussenlaag_family'].value_counts())
-print("\n粒径分布：")
-print(df['tussenlaag_gradation'].value_counts())
-print("\n结构作用分布：")
-print(df['tussenlaag_role'].value_counts())
+# 提取层型
+df['tussenlaag_type'] = df['TUSSENLAAG'].apply(lambda x:
+    'Bind' if 'Bind' in str(x)
+    else 'Base' if 'Base' in str(x)
+    else 'Other' if pd.notna(x)
+    else 'None'
+)
 ```
 
-**3️⃣ 验证 AC Bind 未假设粒径：**
+**3️⃣ 转换为Yes/No（如果需要）：**
 ```python
-# 确认 AC Bind 的粒径是 'unknown'
-ac_bind_rows = df[df['TUSSENLAAG'] == 'AC Bind']
-print(f"\nAC Bind 总数: {len(ac_bind_rows)}")
-print(f"粒径为 unknown 的数量: {(ac_bind_rows['tussenlaag_gradation'] == 'unknown').sum()}")
-assert (ac_bind_rows['tussenlaag_gradation'] == 'unknown').all(), \
-    "❌ 错误：AC Bind 的粒径应该全部为 'unknown'"
-print("✅ 验证通过：AC Bind 粒径正确标记为 'unknown'")
+# 如果要符合JSON定义
+df['TUSSENLAAG_binary'] = df['TUSSENLAAG'].apply(
+    lambda x: 'Ja' if pd.notna(x) else 'Nee'
+)
 ```
 
 **数据处理流程：**
@@ -3884,39 +3540,25 @@ CREATE TABLE road_segments (
 
 **❓ 待与Leon确认的问题：**
 
-**🔴 已解决问题（通过用户澄清）：**
+1. **字段定义修正：**
+   - JSON定义["Ja", "Nee", ""]是否应改为允许具体层型名称？
+   - 还是保留Yes/No，另外添加层型字段？
 
-1. ✅ **STAB含义** - 已确认
-   - 完整名称：Steenslagasfaltbeton (高稳定性沥青混凝土)
-   - 结构作用：Base+Bind (兼作基层和粘结层)
-   - 可用于tussenlaag或onderlaag
+2. **Base vs Bind：**
+   - AC Base 22 和 AC Bind 22 的区别？
+   - 是否应该区分为不同字段（基层vs粘结层）？
 
-2. ✅ **Base vs Bind区别** - 已确认
-   - AC 22 Base：纯基层材料
-   - AC 22 Bind：纯粘结层材料
-   - AC 22 Base/Bind：兼具双重作用的混合层
+3. **STAB含义：**
+   - "STAB"是什么类型的中间层？
+   - 完整名称是什么？
 
-3. ✅ **命名标准** - 已明确
-   - 标准格式：AC [粒径] [层型]
-   - 例如：AC 22 Bind (不是 AC Bind 22)
+4. **命名标准：**
+   - 是否需要统一命名格式？
+   - 建议格式："AC [级配] [Bind/Base]"？
 
-**⚠️ 待确认问题：**
-
-4. **AC Bind 粒径补充（33行，14.9%）**
-   - 问题："AC Bind" 未指定粒径，可能是16mm或22mm
-   - 当前处理：保持 `gradation='unknown'`，不做假设
-   - 需要行动：要求承包商补充完整规格
-
-5. **AC 22 Base 在 TUSSENLAAG 字段的合理性（18行）**
-   - 问题：AC 22 Base 是基层材料，为何出现在中间层字段？
-   - 可能原因：薄结构路面，中间层直接采用基层混合料
-   - 需要确认：这种设计是否符合规范？
-
-**📖 参考来源：**
-- 📄 config/field_mapping_2022.json - 字段19完整定义（已更新）
-- 📄 Analysis/Pavement_Layers_Standardization_Framework.md - 三层标准化框架
-- 💬 用户提供的详细分类规则 (2025-11-05)
-- 📖 RAW Bepalingen - 荷兰路面结构规范
+**参考来源：**
+- 📄 config/field_mapping_2022.json - 字段定义
+- 📊 Analysis/Template_2022_Field_Analysis_OLD.md (lines 1253-1302) - 真实数据统计
 
 
 ---
