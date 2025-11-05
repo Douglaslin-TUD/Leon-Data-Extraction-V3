@@ -1,0 +1,132 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "template": "Verzamelstaat_2022c.xlsx",
+    "created": "2025-11-05",
+    "description": "Validation rules for 2022 template",
+    "rule_categories": [
+      "required_field",
+      "data_type",
+      "range",
+      "format",
+      "enum",
+      "conditional_required",
+      "cross_field_logic",
+      "calculated_field",
+      "reference_data"
+    ]
+  },
+  "rules": [
+    {
+      "rule_id": "REQ-001",
+      "category": "required_field",
+      "enabled": true,
+      "field": "Weg",
+      "description": "道路编号必填",
+      "validation": {
+        "type": "not_null"
+      },
+      "error_message": "字段'Weg'不能为空",
+      "severity": "error"
+    },
+    {
+      "rule_id": "ENUM-001",
+      "category": "enum",
+      "enabled": true,
+      "field": "BAAN",
+      "description": "车道类型必须在允许列表中",
+      "validation": {
+        "type": "in_list",
+        "allowed_values": ["1HRL", "1HRR", "0VW", "0HRM", "PWL"]
+      },
+      "error_message": "字段'BAAN'值'{value}'不在允许列表中",
+      "severity": "error"
+    },
+    {
+      "rule_id": "RANGE-001",
+      "category": "range",
+      "enabled": true,
+      "field": "DIKTE VERHARDING",
+      "description": "路面厚度应在合理范围内",
+      "validation": {
+        "type": "numeric_range",
+        "min": 0.020,
+        "max": 0.150,
+        "unit": "meter"
+      },
+      "error_message": "字段'DIKTE VERHARDING'值{value}超出范围[0.020, 0.150]米",
+      "severity": "warning"
+    },
+    {
+      "rule_id": "COND-001",
+      "category": "conditional_required",
+      "enabled": true,
+      "description": "当STROOK=ALL时，Aantal rijstroken必填",
+      "validation": {
+        "type": "conditional_required",
+        "condition": {
+          "field": "STROOK",
+          "operator": "equals",
+          "value": "ALL"
+        },
+        "then": {
+          "field": "Aantal rijstroken",
+          "required": true
+        }
+      },
+      "error_message": "当STROOK='ALL'时，'Aantal rijstroken'不能为空",
+      "severity": "error"
+    },
+    {
+      "rule_id": "CROSS-001",
+      "category": "cross_field_logic",
+      "enabled": true,
+      "description": "TOT必须大于等于VAN",
+      "validation": {
+        "type": "comparison",
+        "field1": "TOT",
+        "operator": ">=",
+        "field2": "VAN"
+      },
+      "error_message": "TOT({value1})必须大于等于VAN({value2})",
+      "severity": "error"
+    },
+    {
+      "rule_id": "CALC-001",
+      "category": "calculated_field",
+      "enabled": true,
+      "description": "Lengte应该等于(TOT - VAN) * 100",
+      "validation": {
+        "type": "calculated_value",
+        "target_field": "Lengte",
+        "formula": "(TOT - VAN) * 100",
+        "tolerance": 0.01
+      },
+      "error_message": "Lengte({actual})与计算值({expected})不匹配",
+      "severity": "warning"
+    },
+    {
+      "rule_id": "FORMAT-001",
+      "category": "format",
+      "enabled": true,
+      "field": "STROOK",
+      "description": "车道编号格式验证",
+      "validation": {
+        "type": "regex",
+        "pattern": "^(\\d{1}[RWUIQBV]-[LR]|ALL|\\d{1}[RWUIQBV]-[LR],\\s*\\d{1}[RWUIQBV]-[LR])$"
+      },
+      "error_message": "字段'STROOK'格式不正确: {value}",
+      "severity": "warning"
+    }
+  ],
+  "rule_groups": {
+    "critical_validations": ["REQ-001", "ENUM-001", "CROSS-001"],
+    "data_quality_checks": ["RANGE-001", "CALC-001", "FORMAT-001"],
+    "conditional_rules": ["COND-001"]
+  },
+  "notes": {
+    "how_to_add_rules": "按照上述示例格式添加新规则",
+    "rule_execution_order": "按照rules数组顺序执行",
+    "severity_levels": "error=阻止导入, warning=记录但允许, info=仅提示"
+  }
+}

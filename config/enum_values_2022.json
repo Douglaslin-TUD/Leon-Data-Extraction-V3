@@ -1,0 +1,119 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "source": "Analysis of Template 2022 - 1592 rows",
+    "date": "2025-11-05",
+    "description": "Complete enumeration values extracted from actual data"
+  },
+  "enums": {
+    "BAAN": {
+      "description": "车道类型",
+      "values": [
+        {"code": "1HRL", "name": "Hoofdrijbaan Links", "count": 723},
+        {"code": "1HRR", "name": "Hoofdrijbaan Rechts", "count": 669},
+        {"code": "0VW", "name": "Verbindingsweg", "count": 185},
+        {"code": "0HRM", "name": "Hoofdrijbaan Midden", "count": 10},
+        {"code": "PWL", "name": "Parallelweg Links(?)", "count": 4, "note": "需要确认"}
+      ],
+      "allow_custom": false
+    },
+    "STROOK": {
+      "description": "车道编号",
+      "lane_types": {
+        "R": "Rijstrook (Regular lane)",
+        "W": "Weefstrook (Weaving lane)",
+        "I": "Invoegstrook (Acceleration lane)",
+        "U": "Uitvoegstrook (Deceleration lane)",
+        "Q": "Spitsstrook (Rush hour lane)",
+        "B": "Busstrook (Bus lane)",
+        "V": "未知类型 - 需要确认"
+      },
+      "special_values": ["ALL"],
+      "format_pattern": "^\\d{1}[RWUIQBV]-[LR]$",
+      "allow_combination": true,
+      "combination_pattern": "^\\d{1}[RWUIQBV]-[LR],\\s*\\d{1}[RWUIQBV]-[LR]$"
+    },
+    "DISTRICT": {
+      "description": "RWS管理区域",
+      "values": [
+        "ON-Noord", "NN-Oost", "ON_Zuid", "ZN-West", "MN-Zuid",
+        "ZN-Midden", "MN-Noord", "ZN-Zuidoost", "NN-West", "ON-Oost",
+        "WNN-Noord", "WNN-Zuid", "ZD-Zuid", "ZD-Noord", "WNZ-Noord"
+      ],
+      "note": "区域代码命名规则需要文档化"
+    },
+    "DEKLAAGSOORT": {
+      "description": "面层类型",
+      "values": [
+        "DZOAB", "ZOABTW TL", "ZOAB", "ZOABTW OL", "AC 16 Surf",
+        "SMA", "ZOABDI", "ZOABTW", "ZOEAB", "ZOABTW DL", "DGD",
+        "ZOABTW-fijn DL", "SMA-NL 11B", "ZOAB ", "ZOAB+",
+        "SMA-NL 11B ", "ZOABTW fijn OL", "ZOABTW OL ", "SMA 8 Geel",
+        "AC 11 Surf", "SMA 8G+", "SMA-NL 11", "SMA-NL 11B PMB SBS Bestone", "EAB"
+      ],
+      "standardize_needed": true,
+      "notes": [
+        "存在空格变体：'ZOAB' vs 'ZOAB '",
+        "TL/OL/DL含义需要确认",
+        "应该建立标准名称列表"
+      ]
+    },
+    "GRANULAIR_MENGSEL": {
+      "description": "骨料级配",
+      "values": [
+        "0/16", "4/8", "11/16", "0/8", "0/11",
+        "PA 8", "??", "PA 5", "PA16", "0/16 SURF",
+        "0/5", "PA8", "PA 16", "0/5 PMB", "AC 16 surf", "DAB PMB"
+      ],
+      "standard_format": "min/max (mm)",
+      "notes": [
+        "标准格式：0/16, 4/8等",
+        "非标准：PA 8, PA 5等",
+        "存在'??'表示未知",
+        "格式需要标准化"
+      ]
+    },
+    "TUSSENLAAG": {
+      "description": "中间层类型",
+      "values": [
+        "AC 16 Bind", "AC Bind", "AC Base 22", "STAB",
+        "AC Bind 22", "AC 22 base-bind", "AC 16 OL/TL", "AC 22 TL-C"
+      ],
+      "allow_empty": true
+    },
+    "WEGLET": {
+      "description": "道路字母标识",
+      "values": [
+        "a", "b", "c", "d", "e", "f", "g", "h", "j", "k",
+        "m", "n", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y"
+      ],
+      "special_values": [
+        "a/b", "c/d", "[Parallelweg Li]"
+      ],
+      "allow_empty": true,
+      "required_when": "BAAN = '0VW'"
+    }
+  },
+  "reference_data": {
+    "road_numbers": {
+      "source": "Extracted from template data",
+      "description": "有效的道路编号列表",
+      "values": [
+        1, 2, 4, 6, 7, 12, 15, 16, 17, 27, 28, 30, 31, 32, 33, 35, 37, 50, 58, 59
+      ],
+      "note": "共34个不同道路，列出最常见的20个"
+    }
+  },
+  "data_quality_notes": {
+    "format_inconsistencies": [
+      "DEKLAAGSOORT: 存在空格变体",
+      "GRANULAIR_MENGSEL: 格式不统一",
+      "temperatuur: 单位不一致(有的带°C)"
+    ],
+    "unknown_values": [
+      "STROOK: 出现'1V-L'和'1V-R'类型",
+      "BAAN: 'PWL'类型需要确认",
+      "GRANULAIR_MENGSEL: 出现'??'"
+    ]
+  }
+}
