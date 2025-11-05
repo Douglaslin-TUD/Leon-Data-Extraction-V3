@@ -1,0 +1,351 @@
+Hallo Peng, Luuk,
+
+ 
+
+De eerste bestanden staan in de folder T:\BPS.
+
+ 
+
+The original files are precisely what they are. The converted files are combined into one file.
+
+ 
+
+Begin van de toelichting:
+
+ 
+
+1W-L
+
+1W-R
+
+2W-L
+
+2W-R
+
+etc
+
+These are all "weefstroken", lanes on which vehicles merge onto the highway at the end of a loop immediately before other vehicles leave to go around another loop, creating conflict known as weaving. To reduce the effect of this conflict these lanes tend to be long (on our network), but in a typical cloverleaf interchange these lanes are critically short.
+
+ 
+
+1I-L
+
+1I-R
+
+2I-L
+
+2I-R
+
+etc
+
+These are all "invoegstroken". These lanes are identical to acceleration lanes that allow traffic entering a highway to accelerate to the speed of through traffic before merging with it.
+
+ 
+
+1U-L
+
+1U-R
+
+2U-L
+
+2U-R
+
+etc
+
+These are all "uitvoegstroken". These lanes are identical to deceleration lanes. A deceleration lane is a lane adjacent to the primary road or street used to improve traffic safety by allowing drivers to pull out of the through lane and decelerate before turning off a surface street or exiting a highway or motorway. 
+
+ 
+
+1Q-L
+
+1Q-R
+
+2Q-L
+
+2Q-R
+
+etc
+
+These are all "spitsstroken". These lanes are only available to the traffic during rush hours. They are always on the right side of the carriage way. The lanes that we used to refer to as “plusstroken” are now also called “spitsstroken”. Plusstroken were (and are) situated on the left side of the carriage way. They are usually referred to as lane 1 (1R-L or 1R-R).
+
+ 
+
+I will come with more background on the difference between the deceleration and acceleration lanes on the one hand and on-ramps/entrance ramps and off-ramps/exit ramps on the other hand.
+
+Best regards,
+
+ 
+
+Léon
+
+Hallo Peng,
+
+ 
+
+Het bestand met de kruisingsvlakken is inderdaad nog niet compleet. Dit staat er nu in:
+
+ 
+
+Rijksweg
+
+Bijzonderheid
+
+Rijbaan
+
+Km_Van
+
+Km_Tot
+
+Beschrijving locatie
+
+RW200
+
+Kruising
+
+1HRL
+
+2,74
+
+2,5
+
+Kruising met de Willem Schermerhornstraat
+
+RW200
+
+Kruising
+
+1HRR
+
+2,48
+
+2,64
+
+Kruising met de Willem Schermerhornstraat
+
+RW200
+
+Kruising
+
+1HRR
+
+1,38
+
+1,4
+
+Kruising met de Burgemeester De Vlugtlaan
+
+RW200
+
+Kruising
+
+1HRL
+
+1,73
+
+1,4
+
+Kruising met de Burgemeester De Vlugtlaan
+
+RW200
+
+Kruising
+
+1HRL
+
+0,63
+
+0,4
+
+Kruising met de Radarweg
+
+RW200
+
+Kruising
+
+1HRR
+
+0,3
+
+0,5
+
+Kruising met de Radarweg
+
+RW200
+
+Kruising
+
+1HRL
+
+0,215
+
+0
+
+Kruising met de Kimpoweg
+
+RW200
+
+Kruising
+
+1HRR
+
+0
+
+0,15
+
+Kruising met de Kimpoweg
+
+RW200
+
+Kruising
+
+1HRL
+
+-0,1
+
+-0,15
+
+Kruising met de 0VWd van de A10
+
+RW200
+
+Kruising
+
+1HRL
+
+-0,2
+
+-0,3
+
+Kruising met de 0VWa van de A10
+
+RW200
+
+Kruising
+
+1HRR
+
+-0,3
+
+-0,175
+
+Kruisingen met de 0VWa en de 0VWd van de A10.
+
+RW57
+
+Kruising
+
+1HRR
+
+23,65
+
+23,9
+
+Kruising met de Vissersweg
+
+RW57
+
+Kruising
+
+1HRL
+
+24,03
+
+23,77
+
+Kruising met de Vissersweg
+
+RW57
+
+Kruising
+
+1HRL
+
+40,08
+
+40,0
+
+Kruising met de Kabbelaarsbank (met VRI)
+
+RW57
+
+Kruising
+
+1HRR
+
+39,73
+
+39,9
+
+Kruising met de Kabbelaarsbank (met VRI)
+
+RW57
+
+Kruising
+
+0HRM
+
+47,3
+
+47,5
+
+Kruising met de Stoofweg - TOTSO; N57 slaat links af!
+
+RW57
+
+Kruising
+
+0HRM
+
+47,8
+
+47,9
+
+Kruising met de Dorpsweg
+
+RW835
+
+Spoorwegkruising
+
+0HRM
+
+25,2
+
+25,3
+
+Kruising met de spoorbaan van Zwolle naar Almelo
+
+RW61
+
+Spoorwegkruising
+
+1HRR
+
+23,1
+
+23,2
+
+Kruising met de spoorbaan van DOW Terneuzen naar België (Spoorlijn 55)
+
+RW61
+
+Spoorwegkruising
+
+1HRL
+
+23,2
+
+23,1
+
+Kruising met de spoorbaan van DOW Terneuzen naar België (Spoorlijn 55)
+
+ 
+
+ 
+
+Maar in RW65 en in RW14 zitten ook kruisingen en misschien ook npg wel in andere wegen die RWS beheert. Maar dit geeft wel een idee over hoe die tabel er uit gaat zien.
+
+Groeten,
+
+ 
+
+Léon

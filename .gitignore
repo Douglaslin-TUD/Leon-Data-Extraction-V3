@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# API Keys and Credentials
+**/API Key/
+*.json
+!config/*.json
+!**/field_mapping*.json
+!**/validation_rules*.json
+credentials/
+secrets/
+.env
+.env.local
+
+# Large Data Files (Original files - keep local only)
+Data/**/Validator/**/Origineel/*.xlsx
+Data/**/Validator/**/Origineel/*.XLSX
+Data/**/Validator/**/Origineel/*.xls
+Data/**/Validator/**/Origineel/*.XLS
+Data/**/Validator/**/Origineel/*.pdf
+Data/**/Validator/**/Origineel/*.PDF
+
+# Database files (can be regenerated)
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Test outputs
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# OS
+Thumbs.db
