@@ -34,13 +34,100 @@
       "category": "enum",
       "enabled": true,
       "field": "BAAN",
-      "description": "车道类型必须在允许列表中",
+      "description": "车道类型必须在标准BPS值列表中",
       "validation": {
         "type": "in_list",
-        "allowed_values": ["1HRL", "1HRR", "0VW", "0HRM", "PWL"]
+        "allowed_values": ["1HRR", "1HRL", "0HRM", "0VW", "PWL"]
       },
-      "error_message": "字段'BAAN'值'{value}'不在允许列表中",
-      "severity": "error"
+      "error_message": "字段'BAAN'值'{value}'不在允许列表中。有效值: 1HRR, 1HRL, 0HRM, 0VW, PWL",
+      "severity": "error",
+      "source": "Leon确认 + BPS官方文档 + RWS geo服务",
+      "baan_definitions": {
+        "1HRR": {
+          "full_name": "Hoofdrijbaan Rechts",
+          "en": "Right main carriageway",
+          "cn": "右侧主车道",
+          "structure": "1(volgnummer) + HR(baansoort) + R(baanpositie)",
+          "source": "Leon确认"
+        },
+        "1HRL": {
+          "full_name": "Hoofdrijbaan Links",
+          "en": "Left main carriageway",
+          "cn": "左侧主车道",
+          "structure": "1(volgnummer) + HR(baansoort) + L(baanpositie)",
+          "source": "Leon确认"
+        },
+        "0HRM": {
+          "full_name": "Hoofdrijbaan Midden",
+          "en": "Middle main carriageway",
+          "cn": "中间主车道",
+          "structure": "0(volgnummer) + HR(baansoort) + M(baanpositie)",
+          "special_rule": "双向，必须同时有1R-R和1R-L",
+          "source": "Leon确认"
+        },
+        "0VW": {
+          "full_name": "Verbindingsweg",
+          "en": "Connecting road/ramp",
+          "cn": "连接道/匝道",
+          "structure": "0(volgnummer) + VW(baansoort)",
+          "special_rule": "需要WEGLET字段",
+          "source": "Leon确认"
+        },
+        "PWL": {
+          "full_name": "Parallelweg Links",
+          "en": "Left parallel road",
+          "cn": "左侧平行路",
+          "structure": "(1默认)(volgnummer) + PW(baansoort) + L(baanpositie)",
+          "explanation": "Parallelweg是与主路平行的辅道/平行车道",
+          "source": "RWS geo服务 + BPS文档",
+          "references": [
+            "https://geo.rijkswaterstaat.nl/arcgis/rest/services/GDR/bps_kaart/MapServer/9",
+            "RWS Productspecificatie Ultimo (2014)",
+            "NDW NWB基础结构文档"
+          ]
+        }
+      },
+      "baan_structure_explanation": {
+        "pattern": "[baanvolgnummer] + [baansoort] + [baanpositie]",
+        "components": {
+          "baanvolgnummer": {
+            "description": "车道序号",
+            "values": {
+              "0": "连接道/特殊道或无并行关系",
+              "1": "第一条主车道",
+              "2": "第二条主车道（如果存在）"
+            }
+          },
+          "baansoort": {
+            "description": "车道类型",
+            "values": {
+              "HR": "Hoofdrijbaan (主车道)",
+              "VW": "Verbindingsweg (连接道)",
+              "PW": "Parallelweg (平行路)"
+            }
+          },
+          "baanpositie": {
+            "description": "相对于WOL的位置",
+            "values": {
+              "L": "Links (左侧)",
+              "R": "Rechts (右侧)",
+              "M": "Midden (中间)",
+              "(空)": "不适用（如VW）"
+            }
+          }
+        },
+        "examples": {
+          "1HRR": "第1条主车道，右侧",
+          "1HRL": "第1条主车道，左侧",
+          "0HRM": "主车道，中间位置",
+          "0VW": "连接道（无左右位置）",
+          "PWL": "平行路，左侧（默认第1条）"
+        }
+      },
+      "data_quality_notes": {
+        "PWL_frequency": "数据中出现4次（0.25%）",
+        "1HRR_HRR_error": "数据中可能出现'1HRR+HRR'格式，应标准化为'1HRR'"
+      }
     },
     {
       "rule_id": "RANGE-001",
@@ -80,8 +167,8 @@
     {
       "rule_id": "CROSS-001",
       "category": "cross_field_logic",
-      "enabled": true,
-      "description": "TOT必须大于等于VAN",
+      "enabled": false,
+      "description": "【已弃用】TOT必须大于等于VAN",
       "validation": {
         "type": "comparison",
         "field1": "TOT",
@@ -89,21 +176,40 @@
         "field2": "VAN"
       },
       "error_message": "TOT({value1})必须大于等于VAN({value2})",
-      "severity": "error"
+      "severity": "error",
+      "deprecation_reason": "此规则基于错误假设。VAN > TOT在44.5%数据中是正常现象（1HRL, PWL等逆向车道）",
+      "replaced_by": "CROSS-VAN-TOT-DIRECTION",
+      "data_evidence": "709行（44.5%）的数据中VAN > TOT，这些都是有效数据",
+      "corrected_understanding": "VAN/TOT的大小关系由BAAN的oriëntatierichting决定",
+      "date_deprecated": "2025-11-05"
     },
     {
       "rule_id": "CALC-001",
       "category": "calculated_field",
       "enabled": true,
-      "description": "Lengte应该等于(TOT - VAN) * 100",
+      "description": "Lengte应该等于abs(TOT - VAN)，单位为公里",
       "validation": {
         "type": "calculated_value",
         "target_field": "Lengte",
-        "formula": "(TOT - VAN) * 100",
-        "tolerance": 0.01
+        "formula": "abs(TOT - VAN)",
+        "tolerance": 0.001,
+        "result_unit": "kilometer"
       },
-      "error_message": "Lengte({actual})与计算值({expected})不匹配",
-      "severity": "warning"
+      "error_message": "Lengte({actual} km)与计算值({expected} km)不匹配（容差0.001 km）",
+      "severity": "warning",
+      "explanation": {
+        "formula": "abs(TOT - VAN)",
+        "always_positive": true,
+        "reason": "使用绝对值确保长度永远为正，无论VAN和TOT的大小关系",
+        "unit_note": "VAN/TOT/Lengte单位都是公里(km)"
+      },
+      "critical_correction": {
+        "date": "2025-11-05",
+        "old_formula": "(TOT - VAN) * 100（错误）",
+        "correct_formula": "abs(TOT - VAN)",
+        "old_unit": "meter",
+        "correct_unit": "kilometer"
+      }
     },
     {
       "rule_id": "FORMAT-001",
@@ -117,12 +223,226 @@
       },
       "error_message": "字段'STROOK'格式不正确: {value}",
       "severity": "warning"
+    },
+    {
+      "rule_id": "FORMAT-002",
+      "category": "format",
+      "enabled": true,
+      "field": "Weg",
+      "description": "国家高速公路编号格式验证和标准化（A和RW等价，自动去前导零）",
+      "validation": {
+        "type": "regex",
+        "pattern": "^(\\d{1,3}|A\\d{1,3}|RW\\d{1,4})$",
+        "normalization": {
+          "enabled": true,
+          "description": "输入 → 存储 → 输出三阶段处理",
+          "storage_format": "A{number}",
+          "output_format": "{number}",
+          "strip_prefixes": ["RW", "A"],
+          "remove_leading_zeros": true,
+          "add_prefix_for_storage": "A"
+        }
+      },
+      "error_message": "字段'Weg'格式不正确: {value}。有效格式: 1, A1, RW1, RW001（国家高速公路）",
+      "severity": "error",
+      "data_flow": {
+        "input": "承包商提交的多种格式（1, A1, RW1, RW001, RW021等）",
+        "storage": "数据库统一存储为A{数字}格式（A1, A21, A200）- 无前导零",
+        "output": "Excel输出为纯数字（1, 21, 200）- Number类型"
+      },
+      "examples": {
+        "valid_inputs": ["1", "21", "28", "200", "A1", "A21", "A28", "RW1", "RW001", "RW21", "RW021", "RW28"],
+        "invalid_inputs": ["ABC", "A", "RW", "0", "1000", "N200", "A0", "RW0"],
+        "normalization_flow": {
+          "input_1": {"input": "1", "storage": "A1", "excel_output": 1},
+          "input_A1": {"input": "A1", "storage": "A1", "excel_output": 1},
+          "input_RW001": {"input": "RW001", "storage": "A1", "excel_output": 1},
+          "input_21": {"input": "21", "storage": "A21", "excel_output": 21},
+          "input_RW021": {"input": "RW021", "storage": "A21", "excel_output": 21},
+          "input_A28": {"input": "A28", "storage": "A28", "excel_output": 28},
+          "input_200": {"input": "200", "storage": "A200", "excel_output": 200}
+        }
+      },
+      "implementation_notes": {
+        "step1_input_validation": "验证输入格式是否符合正则表达式",
+        "step2_normalization": "去掉A/RW前缀 → 转int去前导零 → 加A前缀",
+        "step3_storage": "存储到数据库: VARCHAR(6) 存储 A1, A21, A28...",
+        "step4_output": "Excel导出: 去掉A前缀 → 转换为int → 输出数字类型",
+        "code_example": "normalize: int(re.sub(r'^(A|RW)', '', value)) → f'A{num}' → output: int(storage.replace('A', ''))"
+      }
+    },
+    {
+      "rule_id": "FORMAT-003",
+      "category": "format",
+      "enabled": true,
+      "field": "Weg",
+      "description": "检测省道N路（不应出现在国家高速公路数据中）",
+      "validation": {
+        "type": "regex",
+        "pattern": "^N\\d{1,3}$",
+        "should_not_match": true
+      },
+      "error_message": "字段'Weg'包含省道编号'{value}'。省道(N路)不属于RWS国家高速公路管辖范围，请确认数据正确性",
+      "severity": "warning",
+      "note": "N道路是省道，不是国家高速公路（A/RW）"
+    },
+    {
+      "rule_id": "ENUM-002",
+      "category": "enum",
+      "enabled": true,
+      "field": "WEGLET",
+      "description": "WEGLET必须是a/b/c/d字母编码",
+      "validation": {
+        "type": "in_list",
+        "allowed_values": ["a", "b", "c", "d"]
+      },
+      "error_message": "字段'WEGLET'值'{value}'不在允许列表中。有效值: a=下匝道顺向, b=上匝道顺向, c=下匝道逆向, d=上匝道逆向",
+      "severity": "error",
+      "source": "BPS_boek_concept.pdf Tabel 3",
+      "examples": {
+        "a": "afrit oplopend (下匝道-顺向)",
+        "b": "toerit oplopend (上匝道-顺向)",
+        "c": "afrit aflopend (下匝道-逆向)",
+        "d": "toerit aflopend (上匝道-逆向)"
+      }
+    },
+    {
+      "rule_id": "COND-002",
+      "category": "conditional_required",
+      "enabled": true,
+      "description": "当BAAN=0VW时，WEGLET必填",
+      "validation": {
+        "type": "conditional_required",
+        "condition": {
+          "field": "BAAN",
+          "operator": "equals",
+          "value": "0VW"
+        },
+        "then": {
+          "field": "WEGLET",
+          "required": true
+        }
+      },
+      "error_message": "当BAAN='0VW'（连接道）时，'WEGLET'不能为空",
+      "severity": "error",
+      "note": "0VW类型必须指定匝道字母编码（a/b/c/d）"
+    },
+    {
+      "rule_id": "CROSS-002",
+      "category": "cross_field_logic",
+      "enabled": true,
+      "description": "STROOK后缀-R只能出现在BAAN=1HRR/0HRM/0VW",
+      "validation": {
+        "type": "conditional_pattern_match",
+        "if": {
+          "field": "STROOK",
+          "pattern": ".*-R$"
+        },
+        "then": {
+          "field": "BAAN",
+          "must_be_in": ["1HRR", "0HRM", "0VW"]
+        }
+      },
+      "error_message": "STROOK '{value1}' 后缀为-R（右向），但BAAN '{value2}' 不是右侧或中间车道。-R只能出现在1HRR/0HRM/0VW",
+      "severity": "error",
+      "source": "Leon说明 + BPS逻辑"
+    },
+    {
+      "rule_id": "CROSS-003",
+      "category": "cross_field_logic",
+      "enabled": true,
+      "description": "STROOK后缀-L只能出现在BAAN=1HRL/0HRM/0VW",
+      "validation": {
+        "type": "conditional_pattern_match",
+        "if": {
+          "field": "STROOK",
+          "pattern": ".*-L$"
+        },
+        "then": {
+          "field": "BAAN",
+          "must_be_in": ["1HRL", "0HRM", "0VW"]
+        }
+      },
+      "error_message": "STROOK '{value1}' 后缀为-L（左向），但BAAN '{value2}' 不是左侧或中间车道。-L只能出现在1HRL/0HRM/0VW",
+      "severity": "error",
+      "source": "Leon说明 + BPS逻辑"
+    },
+    {
+      "rule_id": "CROSS-004",
+      "category": "cross_field_logic",
+      "enabled": false,
+      "description": "Q-R类型（外侧高峰车道）只能出现在右侧或中间车道",
+      "validation": {
+        "type": "conditional_pattern_match",
+        "if": {
+          "field": "STROOK",
+          "pattern": "^[12]Q-R$"
+        },
+        "then": {
+          "field": "BAAN",
+          "must_be_in": ["1HRR", "0HRM", "0VW"]
+        }
+      },
+      "error_message": "Spitsstroken (Q-车道) 总在右侧，STROOK '{value1}' 只能出现在BAAN=1HRR/0HRM/0VW",
+      "severity": "warning",
+      "note": "Leon说明：Q车道总在右侧。但需要确认数据中是否有1Q-L/2Q-L",
+      "source": "Hallo Peng Luuk.txt"
+    },
+    {
+      "rule_id": "DATA-001",
+      "category": "data_quality",
+      "enabled": false,
+      "description": "V-类型（应急车道）编号异常检测",
+      "validation": {
+        "type": "pattern_match",
+        "field": "STROOK",
+        "pattern": "^[12]V-[LR]$",
+        "should_not_match": true
+      },
+      "error_message": "STROOK '{value}' 包含编号应急车道（1V/2V），BPS定义V-为应急车道，通常不应有编号。请确认数据正确性",
+      "severity": "warning",
+      "note": "待Leon确认：1V-L, 1V-R, 2V-R是否为有效值",
+      "source": "BPS_boek_concept.pdf vs 实际数据差异"
+    },
+    {
+      "rule_id": "CROSS-005",
+      "category": "cross_field_logic",
+      "enabled": true,
+      "description": "0HRM中间车道必须同时包含1R-R和1R-L车道",
+      "validation": {
+        "type": "group_validation",
+        "scope": "same_road_section",
+        "grouping_fields": ["Weg", "BAAN", "VAN", "TOT"],
+        "if": {
+          "field": "BAAN",
+          "operator": "equals",
+          "value": "0HRM"
+        },
+        "then": {
+          "field": "STROOK",
+          "must_contain_both": ["1R-R", "1R-L"],
+          "description": "在同一路段（Weg+VAN+TOT相同）内，必须同时出现1R-R和1R-L"
+        }
+      },
+      "error_message": "BAAN='0HRM'（中间车道）时，必须同时包含1R-R（右向第1车道）和1R-L（左向第1车道）。当前路段缺少必要车道",
+      "severity": "error",
+      "source": "Leon说明 - A 0HRM carriage way consists of one 1R-R and one 1R-L lane",
+      "logic_explanation": {
+        "0HRM_definition": "中间车道（Hoofdrijbaan Midden）同时容纳双向交通",
+        "minimum_requirement": "至少包含1R-R（右向）和1R-L（左向）各一条",
+        "optional_lanes": "可能还包含uitvoegstroken (1U-R, 2U-R, 1U-L, 2U-L) 和 invoegstroken (1I-R, 2I-R, 1I-L, 2I-L)",
+        "typical_location": "交叉路口（Kruising）或铁路道口（Spoorwegkruising）"
+      },
+      "implementation_note": "此规则需要分组验证，在同一路段内检查STROOK字段的所有值"
     }
   ],
   "rule_groups": {
-    "critical_validations": ["REQ-001", "ENUM-001", "CROSS-001"],
-    "data_quality_checks": ["RANGE-001", "CALC-001", "FORMAT-001"],
-    "conditional_rules": ["COND-001"]
+    "critical_validations": ["REQ-001", "ENUM-001", "ENUM-002", "CROSS-001", "CROSS-002", "CROSS-003", "CROSS-005"],
+    "data_quality_checks": ["RANGE-001", "CALC-001", "FORMAT-001", "DATA-001"],
+    "conditional_rules": ["COND-001", "COND-002"],
+    "format_rules": ["FORMAT-001", "FORMAT-002", "FORMAT-003"],
+    "baan_strook_logic": ["CROSS-002", "CROSS-003", "CROSS-004", "CROSS-005"],
+    "weglet_rules": ["ENUM-002", "COND-002"]
   },
   "notes": {
     "how_to_add_rules": "按照上述示例格式添加新规则",

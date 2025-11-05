@@ -59,13 +59,125 @@
       "field_name_en": "Road Number",
       "field_name_cn": "道路编号",
       "data_type": "string",
+      "max_length": 6,
       "required": true,
       "classification": "critical",
       "category": "location_identification",
-      "validation_rules": {
-        "pattern": "^(RW|A)\\d{1,4}$"
+      "data_flow": {
+        "input_stage": {
+          "description": "Accept multiple format variants from contractors",
+          "accepted_formats": ["numeric", "A_prefix", "RW_prefix"],
+          "examples": ["1", "21", "A1", "A21", "RW1", "RW001", "RW21", "RW021"],
+          "pattern": "^(\\d{1,3}|A\\d{1,3}|RW\\d{1,4})$"
+        },
+        "normalization_stage": {
+          "description": "Standardize to unified format with leading zero removal",
+          "process": [
+            "1. Strip prefixes (A/RW)",
+            "2. Convert to integer (removes leading zeros)",
+            "3. Add 'A' prefix"
+          ],
+          "examples": {
+            "1": "A1",
+            "21": "A21",
+            "A1": "A1",
+            "A21": "A21",
+            "RW001": "A1",
+            "RW021": "A21",
+            "RW28": "A28"
+          },
+          "storage_format": "A{number}",
+          "remove_leading_zeros": true
+        },
+        "storage_stage": {
+          "description": "Store in database with unified format",
+          "db_type": "VARCHAR(6)",
+          "format": "A{number}",
+          "examples": ["A1", "A21", "A28", "A200"],
+          "no_leading_zeros": true,
+          "reason_for_varchar": "Preserve 'A' prefix, support future N-roads, consistency with other text fields"
+        },
+        "output_stage": {
+          "description": "Convert to pure number for Excel export",
+          "process": [
+            "1. Remove 'A' prefix",
+            "2. Convert to integer",
+            "3. Output as Number type in Excel"
+          ],
+          "examples": {
+            "A1": 1,
+            "A21": 21,
+            "A28": 28,
+            "A200": 200
+          },
+          "excel_type": "Number",
+          "no_text_formatting": true
+        }
       },
-      "description": "National road number (Rijksweg)"
+      "validation_rules": {
+        "input_pattern": "^(\\d{1,3}|A\\d{1,3}|RW\\d{1,4})$",
+        "accepted_formats": ["numeric", "A_prefix", "RW_prefix"],
+        "normalization_required": true,
+        "N_roads_warning": "N roads are provincial roads, not national highways"
+      },
+      "format_examples": {
+        "current_data": ["1", "28", "50", "200", "835"],
+        "future_possible": ["A1", "RW001", "RW021", "RW28"],
+        "equivalent_values": {
+          "note": "All these input formats become the same stored value",
+          "A1": {
+            "inputs": ["1", "A1", "RW1", "RW001"],
+            "stored_as": "A1",
+            "excel_output": 1
+          },
+          "A21": {
+            "inputs": ["21", "A21", "RW21", "RW021"],
+            "stored_as": "A21",
+            "excel_output": 21
+          },
+          "A28": {
+            "inputs": ["28", "A28", "RW28", "RW028"],
+            "stored_as": "A28",
+            "excel_output": 28
+          },
+          "A200": {
+            "inputs": ["200", "A200", "RW200"],
+            "stored_as": "A200",
+            "excel_output": 200
+          }
+        },
+        "NOT_equivalent": {
+          "note": "N roads are provincial, NOT national highways",
+          "example": "N200 ≠ A200 (different road systems)"
+        }
+      },
+      "road_classification": {
+        "A_RW": {
+          "type": "National Highway",
+          "description": "Autosnelweg/Rijksweg - RWS managed national highways",
+          "equivalence": "A and RW prefixes represent the same road",
+          "prefixes": ["A", "RW"],
+          "leading_zero_handling": "Automatically removed during normalization"
+        },
+        "N": {
+          "type": "Provincial Road",
+          "description": "Nationale weg - Provincial roads, NOT RWS managed",
+          "should_appear": false,
+          "action_if_found": "Mark as warning - data may be incorrect",
+          "storage_handling": "Keep original format (N200) if encountered",
+          "excel_output": "Output as text (N200) not number"
+        }
+      },
+      "data_statistics": {
+        "total_roads": 34,
+        "range": "1-835",
+        "most_common": [
+          {"road": "28", "count": 422, "percentage": 26.5},
+          {"road": "1", "count": 369, "percentage": 23.2},
+          {"road": "50", "count": 133, "percentage": 8.4}
+        ]
+      },
+      "description": "National highway number (Rijksweg). Input accepts 1/A1/RW1/RW001, stores as A1, outputs as 1 in Excel. Leading zeros automatically removed. A and RW are equivalent. N roads are provincial roads."
     },
     {
       "field_number": 5,
@@ -98,10 +210,10 @@
     {
       "field_number": 7,
       "field_name_nl": "VAN (graag tot min. 10 meter nauwkeurig)",
-      "field_name_en": "From (Hectometer)",
+      "field_name_en": "From (Kilometer)",
       "field_name_cn": "起始位置",
       "data_type": "number",
-      "unit": "hectometer",
+      "unit": "kilometer",
       "required": true,
       "classification": "critical",
       "category": "location_identification",
@@ -112,15 +224,30 @@
         "precision": 1,
         "european_format": true
       },
-      "description": "Starting position in hectometers (can be negative)"
+      "description": "Starting position in kilometers (can be negative)",
+      "oriëntatierichting": {
+        "description": "道路标准方向系统 (Road standard direction system)",
+        "explanation": "VAN表示起点公里标位置。根据道路的oriëntatierichting（标准方向），VAN可以大于或小于TOT",
+        "direction_rules": {
+          "with_orientation": "沿标准方向时，VAN < TOT（公里标递增）",
+          "against_orientation": "逆标准方向时，VAN > TOT（公里标递减）",
+          "depends_on": "BAAN字段决定行驶方向"
+        }
+      },
+      "critical_correction": {
+        "date": "2025-11-05",
+        "old_understanding": "单位是百米 (hectometer, hm)",
+        "correct_understanding": "单位是公里 (kilometer, km)",
+        "impact": "避免44.5%的数据被误判为错误"
+      }
     },
     {
       "field_number": 8,
       "field_name_nl": "TOT (graag tot min. 10 meter nauwkeurig)",
-      "field_name_en": "To (Hectometer)",
+      "field_name_en": "To (Kilometer)",
       "field_name_cn": "结束位置",
       "data_type": "number",
-      "unit": "hectometer",
+      "unit": "kilometer",
       "required": true,
       "classification": "critical",
       "category": "location_identification",
@@ -129,10 +256,24 @@
         "min": -10,
         "max": 1000,
         "precision": 1,
-        "european_format": true,
-        "must_be_gte": "VAN"
+        "european_format": true
       },
-      "description": "Ending position in hectometers"
+      "description": "Ending position in kilometers",
+      "directional_logic": {
+        "description": "TOT与VAN的大小关系取决于BAAN类型",
+        "note": "VAN > TOT 在某些BAAN类型上是正常的（44.5%的数据）",
+        "examples": {
+          "1HRR": "TOT > VAN（公里标递增）",
+          "1HRL": "VAN > TOT（公里标递减）",
+          "PWL": "VAN > TOT（跟随1HRL）"
+        },
+        "see_also": "CROSS-VAN-TOT-DIRECTION规则"
+      },
+      "critical_correction": {
+        "date": "2025-11-05",
+        "old_rule_removed": "must_be_gte: VAN（错误规则已删除）",
+        "reason": "VAN > TOT在44.5%数据中是正常现象，不是错误"
+      }
     },
     {
       "field_number": 9,
@@ -192,9 +333,21 @@
         "max": 500,
         "precision": 3,
         "european_format": true,
-        "derived_from": "VAN / 10"
+        "derived_from": "VAN"
       },
-      "description": "Starting position in kilometers"
+      "description": "Starting position in kilometers",
+      "redundancy_note": {
+        "description": "冗余字段 - KM_Van与VAN值相同",
+        "reason": "历史原因保留，便于用户理解（显式显示公里单位）",
+        "storage": "实际数据已经是公里，无需除以10",
+        "relationship": "KM_Van = VAN（相同值）"
+      },
+      "critical_correction": {
+        "date": "2025-11-05",
+        "old_formula": "VAN / 10（错误）",
+        "correct_formula": "VAN（相同值）",
+        "impact": "数据验证时不应期望除以10的关系"
+      }
     },
     {
       "field_number": 12,
@@ -212,10 +365,22 @@
         "max": 500,
         "precision": 3,
         "european_format": true,
-        "derived_from": "TOT / 10",
-        "must_be_gte": "KM_Van"
+        "derived_from": "TOT"
       },
-      "description": "Ending position in kilometers"
+      "description": "Ending position in kilometers",
+      "redundancy_note": {
+        "description": "冗余字段 - KM_Tot与TOT值相同",
+        "reason": "与KM_Van配对，显式表示公里单位",
+        "directional_note": "KM_Van > KM_Tot 在某些BAAN类型上是正常的",
+        "relationship": "KM_Tot = TOT（相同值）"
+      },
+      "critical_correction": {
+        "date": "2025-11-05",
+        "old_formula": "TOT / 10（错误）",
+        "correct_formula": "TOT（相同值）",
+        "old_rule_removed": "must_be_gte: KM_Van（错误规则已删除）",
+        "reason": "KM_Van > KM_Tot在某些BAAN上是正常的"
+      }
     },
     {
       "field_number": 13,
@@ -223,18 +388,36 @@
       "field_name_en": "Length",
       "field_name_cn": "长度",
       "data_type": "number",
-      "unit": "meter",
+      "unit": "kilometer",
       "required": true,
       "classification": "critical",
       "category": "quantity",
       "validation_rules": {
         "type": "float",
-        "min": 1,
-        "max": 50000,
+        "min": 0.001,
+        "max": 500,
         "european_format": true,
-        "derived_from": "(TOT - VAN) * 100"
+        "derived_from": "abs(TOT - VAN)"
       },
-      "description": "Total length of the work section in meters"
+      "description": "Total length of the work section in kilometers",
+      "calculation_rules": {
+        "formula": "abs(TOT - VAN)",
+        "unit": "kilometer",
+        "always_positive": true,
+        "explanation": "路段长度永远为正值，无论VAN和TOT的大小关系如何",
+        "examples": {
+          "case1": "VAN=10.5, TOT=12.3 → Lengte=1.8 km",
+          "case2": "VAN=12.3, TOT=10.5 → Lengte=1.8 km (相同结果)"
+        }
+      },
+      "critical_correction": {
+        "date": "2025-11-05",
+        "old_unit": "meter（错误）",
+        "correct_unit": "kilometer",
+        "old_formula": "(TOT - VAN) * 100（错误）",
+        "correct_formula": "abs(TOT - VAN)",
+        "reason": "使用绝对值确保长度永远为正，单位与VAN/TOT一致"
+      }
     },
     {
       "field_number": 14,
