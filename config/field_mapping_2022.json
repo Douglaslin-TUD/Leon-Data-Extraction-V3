@@ -191,7 +191,86 @@
       "validation_rules": {
         "pattern": "^(\\d{1})(VW|HR[LRM])$"
       },
-      "description": "Carriageway classification code (0VW, 1HRL, 1HRR, 0HRM, etc.)"
+      "description": "Carriageway classification code (0VW, 1HRL, 1HRR, 0HRM, etc.)",
+      "direction_relationship": {
+        "concept": "BAAN字段类型决定了该车道相对于道路oriëntatierichting（标准方向）的行驶方向",
+        "importance": "CRITICAL - BAAN类型直接影响VAN/TOT字段的大小关系验证",
+        "baan_types": {
+          "1HRR": {
+            "full_name": "Hoofdrijbaan Rechts",
+            "full_name_en": "Right Main Carriageway",
+            "full_name_cn": "右侧主车道",
+            "orientation": "WITH（沿oriëntatierichting）",
+            "direction": "顺向行驶",
+            "van_tot_relationship": "TOT > VAN",
+            "explanation": "右侧主车道沿着道路标准方向行驶，公里标递增",
+            "data_percentage": "主要类型之一"
+          },
+          "1HRL": {
+            "full_name": "Hoofdrijbaan Links",
+            "full_name_en": "Left Main Carriageway",
+            "full_name_cn": "左侧主车道",
+            "orientation": "AGAINST（逆oriëntatierichting）",
+            "direction": "逆向行驶",
+            "van_tot_relationship": "VAN > TOT",
+            "explanation": "左侧主车道逆着道路标准方向行驶（对向交通），公里标递减",
+            "data_percentage": "44.5%的数据（709行）",
+            "critical_note": "VAN > TOT在1HRL上是正常现象，不是错误！"
+          },
+          "0HRM": {
+            "full_name": "Hoofdrijbaan Midden",
+            "full_name_en": "Middle Main Carriageway",
+            "full_name_cn": "中间主车道",
+            "orientation": "WITH（沿oriëntatierichting，默认取右向）",
+            "direction": "双向车道，记录时以右向为准",
+            "van_tot_relationship": "TOT > VAN",
+            "explanation": "中间车道同时容纳双向交通，但路段定义遵循标准方向",
+            "special_rule": "必须同时包含1R-R和1R-L车道",
+            "typical_location": "交叉路口或铁路道口"
+          },
+          "0VW": {
+            "full_name": "Verbindingsweg",
+            "full_name_en": "Connecting Road/Ramp",
+            "full_name_cn": "连接道/匝道",
+            "orientation": "WITH（沿oriëntatierichting）",
+            "direction": "遵循主路标准方向",
+            "van_tot_relationship": "TOT > VAN",
+            "explanation": "匝道通常遵循其连接的主路的标准方向系统",
+            "special_rule": "需要WEGLET字段（a/b/c/d）"
+          },
+          "PWL": {
+            "full_name": "Parallelweg Links",
+            "full_name_en": "Left Parallel Road",
+            "full_name_cn": "左侧平行路",
+            "orientation": "AGAINST（逆oriëntatierichting）",
+            "direction": "与1HRL同向，逆标准方向",
+            "van_tot_relationship": "VAN > TOT",
+            "explanation": "平行路与左侧主车道方向一致，逆向行驶",
+            "data_percentage": "0.25%（4行）",
+            "note": "平行于1HRL的辅道"
+          }
+        },
+        "validation_impact": {
+          "related_rules": ["CROSS-VAN-TOT-DIRECTION", "CALC-001"],
+          "with_orientation_types": ["1HRR", "0HRM", "0VW"],
+          "against_orientation_types": ["1HRL", "PWL"],
+          "critical_understanding": "BAAN类型是验证VAN/TOT关系的核心依据"
+        },
+        "data_evidence": {
+          "total_rows": 1592,
+          "with_orientation_count": 883,
+          "with_orientation_percentage": 55.5,
+          "against_orientation_count": 709,
+          "against_orientation_percentage": 44.5,
+          "conclusion": "两种方向关系都是正常数据，必须根据BAAN类型分别验证"
+        },
+        "references": {
+          "concept_source": "metadata.domain_concepts.oriëntatierichting",
+          "validation_rule": "CROSS-VAN-TOT-DIRECTION",
+          "data_analysis": "Template_2022_Complete_Field_Reference.md 字段5分析"
+        },
+        "date_added": "2025-11-05"
+      }
     },
     {
       "field_number": 6,

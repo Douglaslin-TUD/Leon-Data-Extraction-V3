@@ -1,8 +1,9 @@
 {
   "metadata": {
-    "version": "1.0",
+    "version": "1.1",
     "template": "Verzamelstaat_2022c.xlsx",
     "created": "2025-11-05",
+    "last_updated": "2025-11-05",
     "description": "Validation rules for 2022 template",
     "rule_categories": [
       "required_field",
@@ -14,7 +15,89 @@
       "cross_field_logic",
       "calculated_field",
       "reference_data"
-    ]
+    ],
+    "domain_concepts": {
+      "oriëntatierichting": {
+        "name_nl": "Oriëntatierichting",
+        "name_en": "Road Standard Direction",
+        "name_cn": "道路标准方向",
+        "definition": "每条道路有一个官方定义的参考方向（oriëntatierichting），类似于河流的'上游→下游'方向。这是道路的'正方向'，用于统一整个道路网络的公里标系统。",
+        "purpose": {
+          "main": "确保道路位置标识的一致性和唯一性",
+          "functions": [
+            "定义公里标的递增方向",
+            "确定车道的顺向/逆向关系",
+            "统一整个国家道路网络的位置参照系统"
+          ]
+        },
+        "how_it_works": {
+          "standard_direction": "道路标准方向由RWS官方定义，对每条道路是固定的",
+          "kilometer_markers": "沿着oriëntatierichting方向，公里标数值递增（0 → 50 → 100 → ...）",
+          "opposite_direction": "逆着oriëntatierichting方向，公里标数值递减（... → 100 → 50 → 0）",
+          "bidirectional_roads": "双向道路上，右侧车道（1HRR）沿标准方向，左侧车道（1HRL）逆标准方向"
+        },
+        "relationship_with_baan": {
+          "description": "BAAN字段类型决定了该车道是顺向还是逆向行驶",
+          "with_orientation": {
+            "baan_types": ["1HRR", "0HRM", "0VW"],
+            "direction": "沿oriëntatierichting（WITH）- 顺向",
+            "van_tot_relationship": "TOT > VAN（公里标递增）",
+            "percentage": "55.5%的数据（883行）"
+          },
+          "against_orientation": {
+            "baan_types": ["1HRL", "PWL"],
+            "direction": "逆oriëntatierichting（AGAINST）- 逆向",
+            "van_tot_relationship": "VAN > TOT（公里标递减）",
+            "percentage": "44.5%的数据（709行）"
+          }
+        },
+        "real_world_example": {
+          "road": "A12高速公路（Den Haag → Utrecht → Arnhem → Duitsland）",
+          "oriëntatierichting": "从西向东（Den Haag → Duitsland）",
+          "right_carriageway_1HRR": {
+            "direction": "向东行驶（Den Haag → Utrecht）",
+            "orientation": "沿oriëntatierichting（WITH）",
+            "kilometer_markers": "VAN=50 → TOT=80（Den Haag → Utrecht段）",
+            "result": "TOT > VAN"
+          },
+          "left_carriageway_1HRL": {
+            "direction": "向西行驶（Utrecht → Den Haag）",
+            "orientation": "逆oriëntatierichting（AGAINST）",
+            "kilometer_markers": "VAN=80 → TOT=50（Utrecht → Den Haag段）",
+            "result": "VAN > TOT",
+            "note": "同一物理位置，但方向相反，公里标递减"
+          }
+        },
+        "impact_on_data_validation": {
+          "critical_correction": {
+            "old_assumption": "所有数据都应满足TOT >= VAN",
+            "correct_understanding": "VAN/TOT关系由BAAN的oriëntatierichting决定",
+            "impact": "44.5%的数据（709行）VAN > TOT是完全正常的，不是错误",
+            "related_rules": ["CROSS-VAN-TOT-DIRECTION", "CALC-001"]
+          },
+          "fields_affected": {
+            "VAN": "起始公里标位置（kilometer）",
+            "TOT": "结束公里标位置（kilometer）",
+            "KM_Van": "与VAN相同（冗余字段）",
+            "KM_Tot": "与TOT相同（冗余字段）",
+            "Lengte": "路段长度 = abs(TOT - VAN)，永远为正"
+          }
+        },
+        "terminology_clarification": {
+          "not_start_end": "VAN/TOT不是'起点/终点'（start/end point），而是'起始公里标/结束公里标'（from kilometer / to kilometer）",
+          "location_based": "公里标是位置标识，不是距离测量",
+          "direction_dependent": "公里标的递增/递减方向取决于行驶方向与oriëntatierichting的关系"
+        },
+        "references": {
+          "source": "Template_2022_Complete_Field_Reference.md 字段7-8详细分析",
+          "bps_documentation": "BPS (Beheer- en Planningssysteem) 道路系统文档",
+          "rws_standards": "RWS道路网络位置标识系统",
+          "data_evidence": "1,592行2022年实际数据验证"
+        },
+        "date_added": "2025-11-05",
+        "importance": "CRITICAL - 理解此概念是正确验证VAN/TOT字段的前提"
+      }
+    }
   },
   "rules": [
     {
@@ -182,6 +265,211 @@
       "data_evidence": "709行（44.5%）的数据中VAN > TOT，这些都是有效数据",
       "corrected_understanding": "VAN/TOT的大小关系由BAAN的oriëntatierichting决定",
       "date_deprecated": "2025-11-05"
+    },
+    {
+      "rule_id": "CROSS-VAN-TOT-DIRECTION",
+      "category": "cross_field_logic",
+      "enabled": true,
+      "description": "验证VAN和TOT的方向关系是否符合BAAN类型的oriëntatierichting（道路标准方向）",
+      "validation": {
+        "type": "directional_logic",
+        "fields": ["VAN", "TOT", "BAAN"],
+        "direction_rules": {
+          "with_orientation": {
+            "baan_types": ["1HRR", "0HRM", "0VW"],
+            "expected_relationship": "TOT > VAN",
+            "description": "顺向车道（沿oriëntatierichting行驶），公里标递增",
+            "data_percentage": "55.5%（883行）"
+          },
+          "against_orientation": {
+            "baan_types": ["1HRL", "PWL"],
+            "expected_relationship": "VAN > TOT",
+            "description": "逆向车道（逆oriëntatierichting行驶），公里标递减",
+            "data_percentage": "44.5%（709行）"
+          }
+        }
+      },
+      "error_message": "BAAN '{baan}' 的方向关系错误：{direction_type}应满足{expected}，但实际VAN={van} TOT={tot}",
+      "severity": "error",
+      "conceptual_explanation": {
+        "oriëntatierichting": {
+          "definition": "道路标准方向（Road standard direction）- 每条道路有一个官方定义的参考方向",
+          "purpose": "统一整个道路网络的公里标系统，确保位置标识的一致性",
+          "analogy": "类似于河流的'上游→下游'方向，是道路的'正方向'"
+        },
+        "baan_direction_relationship": {
+          "1HRR": {
+            "full_name": "Hoofdrijbaan Rechts（右侧主车道）",
+            "orientation": "沿oriëntatierichting（WITH）",
+            "logic": "右侧主车道顺着道路标准方向行驶",
+            "van_tot": "TOT > VAN（公里标递增）",
+            "example": "VAN=10.5 → TOT=12.3（向前行驶2.8公里）"
+          },
+          "1HRL": {
+            "full_name": "Hoofdrijbaan Links（左侧主车道）",
+            "orientation": "逆oriëntatierichting（AGAINST）",
+            "logic": "左侧主车道逆着道路标准方向行驶（对向交通）",
+            "van_tot": "VAN > TOT（公里标递减）",
+            "example": "VAN=12.3 → TOT=10.5（逆向行驶2.8公里）"
+          },
+          "0HRM": {
+            "full_name": "Hoofdrijbaan Midden（中间主车道）",
+            "orientation": "沿oriëntatierichting（WITH）- 默认取右向",
+            "logic": "双向车道，但记录时以右向为准",
+            "van_tot": "TOT > VAN",
+            "note": "虽然包含双向交通，但路段定义遵循标准方向"
+          },
+          "0VW": {
+            "full_name": "Verbindingsweg（连接道/匝道）",
+            "orientation": "沿oriëntatierichting（WITH）",
+            "logic": "匝道通常遵循主路的标准方向系统",
+            "van_tot": "TOT > VAN",
+            "note": "匝道的方向由其连接的主路决定"
+          },
+          "PWL": {
+            "full_name": "Parallelweg Links（左侧平行路）",
+            "orientation": "逆oriëntatierichting（AGAINST）",
+            "logic": "与左侧主车道同向，逆标准方向",
+            "van_tot": "VAN > TOT",
+            "example": "平行于1HRL的辅道，同样逆向行驶"
+          }
+        },
+        "why_this_matters": {
+          "data_integrity": "44.5%的数据（709行）VAN > TOT是完全正常的，不是错误",
+          "location_system": "VAN/TOT不是'起点/终点'，而是'起始公里标/结束公里标'",
+          "bidirectional_roads": "双向道路上，左右车道的VAN/TOT关系完全相反"
+        }
+      },
+      "validation_logic": {
+        "step1": "检查BAAN类型",
+        "step2": "确定该BAAN的oriëntatierichting（WITH或AGAINST）",
+        "step3": "验证VAN/TOT关系是否符合预期",
+        "step4_with": "如果WITH方向 → 检查 TOT > VAN",
+        "step4_against": "如果AGAINST方向 → 检查 VAN > TOT"
+      },
+      "implementation_pseudocode": {
+        "code": [
+          "if BAAN in ['1HRR', '0HRM', '0VW']:",
+          "    # 顺向车道，期望公里标递增",
+          "    if not (TOT > VAN):",
+          "        raise Error('顺向车道应满足 TOT > VAN')",
+          "",
+          "elif BAAN in ['1HRL', 'PWL']:",
+          "    # 逆向车道，期望公里标递减",
+          "    if not (VAN > TOT):",
+          "        raise Error('逆向车道应满足 VAN > TOT')",
+          "",
+          "else:",
+          "    # 未知BAAN类型，跳过验证",
+          "    pass"
+        ]
+      },
+      "data_evidence": {
+        "total_rows": 1592,
+        "tot_gt_van": {
+          "count": 883,
+          "percentage": 55.5,
+          "baan_distribution": {
+            "1HRR": "占大多数",
+            "0HRM": "少量",
+            "0VW": "少量"
+          }
+        },
+        "van_gt_tot": {
+          "count": 709,
+          "percentage": 44.5,
+          "baan_distribution": {
+            "1HRL": "占大多数",
+            "PWL": "4行（0.25%）"
+          }
+        },
+        "conclusion": "数据完美符合BAAN方向规则，两种关系都是正常的"
+      },
+      "source": "Template_2022_Complete_Field_Reference.md 字段7-8分析 + 荷兰道路系统oriëntatierichting概念",
+      "replaces": "CROSS-001（已弃用）",
+      "date_added": "2025-11-05"
+    },
+    {
+      "rule_id": "RANGE-VAN-TOT",
+      "category": "range",
+      "enabled": true,
+      "description": "检测VAN和TOT值的异常范围（应在合理的公里标范围内）",
+      "validation": {
+        "type": "numeric_range",
+        "fields": ["VAN", "TOT"],
+        "normal_range": {
+          "min": -50.0,
+          "max": 600.0,
+          "unit": "kilometer",
+          "description": "荷兰国家高速公路公里标的正常范围"
+        },
+        "anomaly_detection": {
+          "extreme_values": {
+            "threshold": 1000.0,
+            "description": "公里标值超过1000可能是数据错误"
+          },
+          "negative_values": {
+            "min": -50.0,
+            "description": "负值允许（起点前路段），但不应小于-50"
+          }
+        }
+      },
+      "error_message": "字段'{field}'值{value} km超出正常范围[{min}, {max}] km，请确认数据正确性",
+      "severity": "warning",
+      "data_evidence": {
+        "van_range": {
+          "min": -13.7,
+          "max": 54350.0,
+          "description": "VAN字段实际范围",
+          "anomaly": "最大值54350.0明显异常（应为543.50或54.350?）"
+        },
+        "tot_range": {
+          "min": -13.6,
+          "max": 54350.1,
+          "description": "TOT字段实际范围",
+          "anomaly": "最大值54350.1明显异常"
+        },
+        "normal_percentile": {
+          "p99_van": "约180 km（99%数据的上限）",
+          "p99_tot": "约180 km",
+          "conclusion": "99%的数据在合理范围内，超大值是离群点"
+        }
+      },
+      "special_cases": {
+        "negative_kilometers": {
+          "valid": true,
+          "explanation": "负值公里标是合法的，表示道路起点之前的路段（如连接段、匝道起点）",
+          "example": "VAN=-13.7表示在道路0公里标之前13.7公里处",
+          "min_allowed": -50.0,
+          "reason": "超过-50的负值可能是数据错误"
+        },
+        "very_large_values": {
+          "threshold": 600.0,
+          "explanation": "荷兰最长国家高速公路A12约180km，A2约185km。超过600的值极可能是错误",
+          "suspected_errors": {
+            "54350.0": {
+              "possible_cause": "单位错误或小数点位置错误",
+              "corrections": [
+                "543.50 km（小数点错误）",
+                "54.350 km（单位错误：从米转换时错误）",
+                "543 hm = 54.3 km（单位混淆）"
+              ]
+            }
+          }
+        }
+      },
+      "implementation_logic": {
+        "step1": "检查VAN值是否在[-50, 600]范围内",
+        "step2": "检查TOT值是否在[-50, 600]范围内",
+        "step3": "如果超出范围，生成警告",
+        "step4": "如果超过1000，生成严重警告（极可能是错误）"
+      },
+      "source": "Template_2022_Complete_Field_Reference.md 字段7-8数据统计 + 荷兰道路网络实际长度",
+      "references": {
+        "dutch_highway_lengths": "A12≈180km, A2≈185km（最长的国家高速公路）",
+        "data_analysis": "1,592行数据中发现VAN/TOT最大值54350.0（明显异常）"
+      },
+      "date_added": "2025-11-05"
     },
     {
       "rule_id": "CALC-001",
@@ -437,12 +725,14 @@
     }
   ],
   "rule_groups": {
-    "critical_validations": ["REQ-001", "ENUM-001", "ENUM-002", "CROSS-001", "CROSS-002", "CROSS-003", "CROSS-005"],
-    "data_quality_checks": ["RANGE-001", "CALC-001", "FORMAT-001", "DATA-001"],
+    "critical_validations": ["REQ-001", "ENUM-001", "ENUM-002", "CROSS-VAN-TOT-DIRECTION", "CROSS-002", "CROSS-003", "CROSS-005"],
+    "data_quality_checks": ["RANGE-001", "RANGE-VAN-TOT", "CALC-001", "FORMAT-001", "DATA-001"],
     "conditional_rules": ["COND-001", "COND-002"],
     "format_rules": ["FORMAT-001", "FORMAT-002", "FORMAT-003"],
     "baan_strook_logic": ["CROSS-002", "CROSS-003", "CROSS-004", "CROSS-005"],
-    "weglet_rules": ["ENUM-002", "COND-002"]
+    "weglet_rules": ["ENUM-002", "COND-002"],
+    "directional_logic": ["CROSS-VAN-TOT-DIRECTION"],
+    "range_checks": ["RANGE-001", "RANGE-VAN-TOT"]
   },
   "notes": {
     "how_to_add_rules": "按照上述示例格式添加新规则",
