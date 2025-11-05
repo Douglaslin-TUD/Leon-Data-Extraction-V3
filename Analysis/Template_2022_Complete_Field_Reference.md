@@ -2947,23 +2947,8 @@ CREATE TABLE aggregate_gradations (
 **必填：** 是（但8.3%缺失）
 **单位：** 无（类型分类）
 
-**📊 JSON定义（权威来源）：**
-```json
-{
-  "field_number": 17,
-  "field_name_nl": "DEKLAAGSOORT (bijv. ZOAB, SMA, tweelaags ZOAB, duurzaam ZOAB, etc.)",
-  "field_name_en": "Surface Layer Type",
-  "field_name_cn": "面层类型",
-  "data_type": "string",
-  "required": true,
-  "classification": "critical",
-  "category": "material_specification",
-  "validation_rules": {
-    "enum": ["ZOAB", "DZOAB", "SMA", "Tweelaags ZOAB", "Duurzaam ZOAB", "DAB", "PA", "Dunne deklagen"]
-  },
-  "description": "Type of surface layer (wearing course)"
-}
-```
+**含义：**
+道路面层（磨耗层）的沥青混合料类型。面层直接承受交通荷载和环境作用，其类型决定了路面的性能特征，如降噪、排水、抗滑、耐久性等。
 
 **📊 数据统计（基于1,592行真实数据）：**
 
@@ -2973,188 +2958,399 @@ CREATE TABLE aggregate_gradations (
 
 **📈 值分布（所有24个不同值）：**
 
-| 面层类型 | 次数 | 占比 | 分类 |
-|---------|------|------|------|
-| `DZOAB` | 634 | 43.4% | 密级配多孔沥青 ✅ |
-| `ZOABTW TL` | 185 | 12.7% | 双层ZOAB-表层 ✅ |
-| `ZOAB` | 179 | 12.3% | 多孔沥青 ✅ |
-| `ZOABTW OL` | 132 | 9.0% | 双层ZOAB-底层 ✅ |
-| `AC 16 Surf` | 89 | 6.1% | AC面层 ✅ |
-| `SMA` | 52 | 3.6% | 沥青玛蹄脂碎石 ✅ |
-| `ZOABDI` | 29 | 2.0% | 耐久ZOAB |
-| `ZOABTW` | 26 | 1.8% | 双层ZOAB |
-| `ZOEAB` | 23 | 1.6% | 特殊ZOAB变体？|
-| `ZOABTW DL` | 21 | 1.4% | 双层ZOAB-面层 |
-| `DGD` | 17 | 1.2% | 稀浆封层 |
-| `ZOABTW-fijn DL` | 15 | 1.0% | 细双层ZOAB |
-| `SMA-NL 11B` | 13 | 0.9% | SMA荷兰标准 |
+| 面层类型 | 次数 | 占比 | 家族分类 |
+|---------|------|------|----------|
+| `DZOAB` | 634 | 43.4% | ZOAB系列-耐久型 |
+| `ZOABTW TL` | 185 | 12.7% | ZOAB系列-双层上层 |
+| `ZOAB` | 179 | 12.3% | ZOAB系列-标准 |
+| `ZOABTW OL` | 132 | 9.0% | ZOAB系列-双层下层 |
+| `AC 16 Surf` | 89 | 6.1% | AC系列 |
+| `SMA` | 52 | 3.6% | SMA系列-标准 |
+| `ZOABDI` | 29 | 2.0% | ZOAB系列-薄层罩面 |
+| `ZOABTW` | 26 | 1.8% | ZOAB系列-双层(未指定层位) |
+| `ZOEAB` | 23 | 1.6% | ZOAB系列-乳化延寿层 |
+| `ZOABTW DL` | 21 | 1.4% | ZOAB系列-双层上层⚠️ |
+| `DGD` | 17 | 1.2% | 薄层养护类 |
+| `ZOABTW-fijn DL` | 15 | 1.0% | ZOAB系列-双层上层(fijn冗余) |
+| `SMA-NL 11B` | 13 | 0.9% | SMA系列-荷兰标准 |
 | `ZOAB ` | 13 | 0.9% | ⚠️ 尾随空格 |
-| `ZOAB+` | 6 | 0.4% | ZOAB改进型 |
+| `ZOAB+` | 6 | 0.4% | ZOAB系列-耐久型 |
 | `SMA-NL 11B ` | 5 | 0.3% | ⚠️ 尾随空格 |
-| `ZOABTW fijn OL` | 5 | 0.3% | 细双层ZOAB-底层 |
+| `ZOABTW fijn OL` | 5 | 0.3% | ⚠️ 矛盾(fijn+OL) |
 | `ZOABTW OL ` | 4 | 0.3% | ⚠️ 尾随空格 |
-| `SMA 8 Geel` | 4 | 0.3% | 黄色SMA |
-| `AC 11 Surf` | 3 | 0.2% | AC面层 |
-| `SMA 8G+` | 2 | 0.1% | SMA改进型 |
-| `SMA-NL 11` | 1 | 0.1% | SMA荷兰标准 |
-| `SMA-NL 11B PMB SBS Bestone` | 1 | 0.1% | 详细规格 |
-| `EAB` | 1 | 0.1% | 特殊类型 |
+| `SMA 8 Geel` | 4 | 0.3% | SMA系列-黄色⚠️ |
+| `AC 11 Surf` | 3 | 0.2% | AC系列 |
+| `SMA 8G+` | 2 | 0.1% | SMA系列-静音型 |
+| `SMA-NL 11` | 1 | 0.1% | SMA系列-荷兰标准 |
+| `SMA-NL 11B PMB SBS Bestone` | 1 | 0.1% | SMA系列-详细规格⚠️ |
+| `EAB` | 1 | 0.1% | 乳化养护类 |
 
-**含义：**
-道路面层（磨耗层）的类型。面层直接承受交通荷载和环境作用，其类型决定了路面的性能特征，如降噪、排水、抗滑、耐久性等。
+**🔍 面层命名结构解析：**
 
-**🔍 主要面层类型详解：**
+DEKLAAGSOORT命名由多层信息组成：
 
-**ZOAB系列（多孔沥青）：** 43.4% + 12.3% + 12.7% + 9.0% = 77.4%
-- **DZOAB (Dicht ZOAB)** - 密级配多孔沥青，最常用（43.4%）
-- **ZOAB** - 标准多孔沥青（12.3%）
-- **ZOABTW (Tweelaags)** - 双层多孔沥青：
-  - TL (Toplaag/表层) - 12.7%
-  - OL (Onderlaag/底层) - 9.0%  
-  - DL (Deklaag/面层) - 1.4%
-- **ZOABDI (Duurzaam/Innovatief)** - 耐久/创新型ZOAB
+1. **家族/结构类型** - ZOAB, DZOAB, SMA, AC, DGD, EAB等
+2. **层位标识** - DL(Deklaag上层), OL(Onderlaag下层), TL(Toplaag上层)
+3. **粒级/细度** - 8, 11, 16, fijn等
+4. **附加属性** - D/+耐久, NL荷兰标准, Geel黄色, G+静音等
 
-**SMA系列（沥青玛蹄脂碎石）：** 3.6%
-- **SMA** - 标准SMA（3.6%）
-- **SMA-NL 11B** - 荷兰标准11B型（0.9%）
-- **SMA 8 Geel** - 8mm黄色SMA（用于标识）
+**📚 主要面层类型家族详解：**
 
-**AC系列（致密级配沥青混凝土）：** 6.1%
-- **AC 16 Surf** - 16mm AC面层（6.1%）
-- **AC 11 Surf** - 11mm AC面层（0.2%）
+#### 1️⃣ ZOAB系列 (多孔沥青) - 77.4%总占比
 
-**⚠️ 数据质量问题：**
+**DZOAB (Duurzaam Zeer Open Asfaltbeton)**
+- 中文名：耐久多孔沥青
+- 占比：43.4% (最常用)
+- 结构：单层
+- 特性：耐久型、改进版ZOAB，仍然是高空隙(zeer open)结构
+- 等价：DZOAB ≈ ZOAB+ (都是耐久型)
 
-**问题1：尾随空格**
-- "ZOAB " vs "ZOAB"（13次带空格）
-- "SMA-NL 11B " vs "SMA-NL 11B"（5次带空格）
-- "ZOABTW OL " vs "ZOABTW OL"（4次带空格）
-- 需要trim处理
+**ZOAB (Zeer Open Asfaltbeton)**
+- 中文名：标准多孔沥青
+- 占比：12.3%
+- 结构：单层
+- 用途：常规高速主线排水降噪
+- 注意：数据中"ZOAB"和"ZOAB "(带空格)应归为同一类
 
-**问题2：TL/OL/DL后缀不统一**
+**ZOABTW (Tweelaags ZOAB) - 双层多孔沥青系统**
+- 中文名：双层多孔沥青
+- 占比：12.7%(TL) + 9.0%(OL) + 1.4%(DL) + 1.8%(无后缀) = 24.9%
+- 结构：双层系统(上层细级配 + 下层粗级配)
+
+层位标识：
+- **TL** (推测 = Toplaag) - 上层面层，细级配 (185次, 12.7%) ⚠️ 需确认
+- **OL** (Onderlaag) - 下层面层，粗级配 (132次, 9.0%) ✅ 确认
+- **DL** (Deklaag) - 上层面层(推测等同于Toplaag) (21次, 1.4%) ⚠️ 需确认
+- **(无后缀)** - 未指定层位 (26次, 1.8%)
+
+冗余标注处理：
+- ZOABTW-fijn DL ≈ ZOABTW DL (fijn在上层是冗余信息)
+- ZOABTW fijn ≈ ZOABTW (泛指)
+- ZOABTW fijn OL ≈ ZOABTW OL (但存在矛盾：fijn与OL通常不匹配) ⚠️
+
+**ZOABDI (ZOAB - Dunne Inlage)**
+- 中文名：ZOAB薄层罩面
+- 占比：2.0%
+- 结构：薄层罩面(Dunne Inlage)
+- 功能：在旧ZOAB上加铺薄层嵌补/罩面，改良表面、抗剥落、延长寿命
+- 特点：具有ZOAB空隙与纹理，结构上接近DGD类薄层降噪罩面
+- 分类：独立类别，不等同于ZOABTW DL
+
+**ZOEAB (Zeer Open Emulsie Asfaltbeton)**
+- 中文名：ZOAB寿命延长层(高空隙乳化罩面)
+- 占比：1.6%
+- 结构：乳化沥青罩面
+- 功能：高空隙乳化沥青混凝土，专门做在旧ZOAB上延长寿命
+  - 修复轻度剥落的ZOAB
+  - 恢复纹理
+  - 封闭和延寿
+- 分类：乳化沥青养护类
+
+#### 2️⃣ SMA系列 (沥青玛蹄脂碎石) - 5.2%总占比
+
+**SMA (Stone Mastic Asphalt)**
+- 中文名：标准SMA面层
+- 占比：3.6%
+- 特点：玛蹄脂骨架、抗车辙好
+
+**SMA-NL 11B / SMA-NL 11**
+- 中文名：荷兰标准SMA面层
+- 占比：0.9% + 0.1% = 1.0%
+- 标准：荷兰标准系列
+- 粒径：11mm
+- 配方：11B为B型配方，11为未细分A/B型
+
+**SMA 8G+**
+- 中文名：8mm静音型SMA(G+变型)
+- 占比：0.1%
+- 粒径：8mm
+- 特性：G+型降噪SMA，专门调成更安静
+
+**SMA 8 Geel**
+- 中文名：黄色8mm SMA
+- 占比：0.3%
+- 粒径：8mm
+- 颜色：Geel (黄色)
+- ⚠️ 待确认：是否有特殊声学性能？是否有标准配方？还是仅项目自定义着色？
+
+**SMA-NL 11B PMB SBS Bestone**
+- 中文名：改性SMA-NL 11B
+- 占比：0.1%
+- 基础型：SMA-NL 11B
+- 改性剂：PMB (聚合物改性沥青), SBS (SBS改性剂), Bestone (特定石料品牌)
+- ⚠️ 建议：PMB/SBS/Bestone应分离到材料属性字段(字段15或新字段)
+
+#### 3️⃣ AC系列 (致密级配沥青混凝土) - 6.3%总占比
+
+**AC 16 Surf / AC 11 Surf**
+- 中文名：AC面层
+- 占比：6.1% + 0.2% = 6.3%
+- 结构：Asfaltbeton (致密沥青混凝土)
+- 粒径：16mm / 11mm (最大粒径)
+- 层位：Surf = Surface (表层)
+- 用途：不要求降噪的路段
+- 分类：非多孔、常规AC面层
+
+#### 4️⃣ 薄层与乳化养护类 - 1.3%总占比
+
+**DGD (Dunne Geluidreducerende Deklaag)**
+- 中文名：薄层降噪面层
+- 占比：1.2%
+- 结构：薄层
+- 用途：省道、市政道路以及作为ZOAB的替代型静音面层
+
+**EAB (Emulsie Asfaltbeton)**
+- 中文名：乳化沥青混凝土(冷拌养护层)
+- 占比：0.1%
+- 结构：冷拌
+- 特性：冷拌、节能
+- 用途：车辙修复、旧路表面翻新、纹理恢复
+- 分类：乳化/冷拌养护面层
+
+**🚨 数据质量问题：**
+
+**问题1：尾随空格 (22次, 1.5%)**
 ```
-ZOABTW TL  - 185次 (Toplaag/表层)
-ZOABTW OL  - 132次 (Onderlaag/底层)
-ZOABTW DL  - 21次  (Deklaag/面层)
-ZOABTW     - 26次  (无后缀)
+"ZOAB " vs "ZOAB"      (13次带空格)
+"SMA-NL 11B " vs "SMA-NL 11B"  (5次带空格)
+"ZOABTW OL " vs "ZOABTW OL"    (4次带空格)
 ```
-- 需确认：TL和DL是否相同？
-- 26次无后缀ZOABTW缺少层位信息
+**处理：** 需要trim()标准化
 
-**问题3：变体命名**
-- "ZOAB+" - 是ZOAB的改进型？还是数据错误？
-- "SMA 8G+" - "G"表示Geel（黄色）？"+"表示改进型？
-- "ZOEAB" vs "ZOAB" - 拼写错误还是特殊类型？
+**问题2：ZOABTW层位标识不一致**
+```
+ZOABTW TL  - 185次 (推测=Toplaag上层)  ⚠️ 需确认
+ZOABTW DL  - 21次  (推测=Deklaag上层)  ⚠️ 需确认
+ZOABTW OL  - 132次 (=Onderlaag下层)    ✅ 确认
+ZOABTW     - 26次  (无后缀，缺少层位信息)
+```
+**关键问题：**
+- TL 是 Toplaag(上层) 还是 Tussenlaag(中间层/结合层)？
+- DL 是否真的等同于 Toplaag(上层)？
+- 如果 DL = TL = Toplaag，则应归为同一类
 
-**问题4：过度详细规格**
-- "SMA-NL 11B PMB SBS Bestone" - 包含了改性剂和供应商信息
-- 应该简化为"SMA-NL 11B"？
+**问题3：ZOABTW fijn OL 的矛盾 (5次, 0.3%)**
+- OL (Onderlaag/下层) 通常为粗级配
+- fijn 表示细级配
+- 矛盾：细级配却标注为下层
+- ⚠️ 需确认：是数据错误还是特殊配置？
 
-**数据清洗建议：**
+**问题4：变体命名**
+- "ZOAB+" - 耐久型改进版(等同于DZOAB)
+- "SMA 8G+" - G+型静音SMA
+- "ZOEAB" - 高空隙乳化罩面(非拼写错误)
 
-**1️⃣ 去除空格：**
+**问题5：过度详细规格**
+- "SMA-NL 11B PMB SBS Bestone" - 包含改性剂和供应商信息
+- 建议：基础类型(SMA-NL 11B)和材料属性(PMB/SBS/Bestone)应分离存储
+
+**🛠️ 数据清洗建议：**
+
+**1️⃣ 去除尾随空格：**
 ```python
 df['DEKLAAGSOORT'] = df['DEKLAAGSOORT'].str.strip()
 ```
 
-**2️⃣ 标准化ZOABTW后缀：**
+**2️⃣ 标准化ZOABTW层位标识（待Leon确认后执行）：**
 ```python
-# 统一TL/DL为Toplaag
+# 如果确认 DL = TL = Toplaag
 df['DEKLAAGSOORT'] = df['DEKLAAGSOORT'].replace({
-    'ZOABTW DL': 'ZOABTW TL',  # 如果DL=TL
-    'ZOABTW-fijn DL': 'ZOABTW fijn TL'
+    'ZOABTW DL': 'ZOABTW TL',
+    'ZOABTW-fijn DL': 'ZOABTW TL'  # fijn在上层是冗余
 })
 ```
 
-**3️⃣ 简化详细规格：**
+**3️⃣ 统一耐久型ZOAB：**
 ```python
-# 提取主要类型
-df['DEKLAAGSOORT_simplified'] = df['DEKLAAGSOORT'].str.extract(
-    r'(DZOAB|ZOAB|SMA|AC \d+ Surf|DGD|EAB)'
+df['DEKLAAGSOORT'] = df['DEKLAAGSOORT'].replace({
+    'ZOAB+': 'DZOAB'  # 都是耐久型
+})
+```
+
+**4️⃣ 提取基础类型和材料属性：**
+```python
+# 分离材料属性
+df['base_surface_type'] = df['DEKLAAGSOORT'].str.extract(
+    r'(DZOAB|ZOAB|SMA|AC \d+ Surf|DGD|EAB|ZOABTW)'
+)[0]
+
+# 提取改性剂信息（可选）
+df['modifiers'] = df['DEKLAAGSOORT'].str.extract(
+    r'(PMB|SBS|Bestone)'
 )[0]
 ```
 
-**数据处理流程：**
+**💾 数据处理流程：**
 
-**1️⃣ 输入和标准化：**
 ```python
+import pandas as pd
+
+# 1️⃣ 读取数据
 df = pd.read_excel('template.xlsx', dtype={'DEKLAAGSOORT': str})
-df['DEKLAAGSOORT'] = df['DEKLAAGSOORT'].str.strip().str.upper()
-```
 
-**2️⃣ 验证与分类：**
-```python
-# 定义主要类型
-main_types = {
-    'ZOAB': ['DZOAB', 'ZOAB', 'ZOABTW', 'ZOABDI', 'ZOEAB'],
-    'SMA': ['SMA', 'SMA-NL'],
+# 2️⃣ 基础清洗
+df['DEKLAAGSOORT'] = (
+    df['DEKLAAGSOORT']
+    .str.strip()           # 去除空格
+    .str.upper()           # 统一大写(可选)
+)
+
+# 3️⃣ 定义面层家族
+surface_families = {
+    'ZOAB_durable': ['DZOAB', 'ZOAB+'],
+    'ZOAB_standard': ['ZOAB'],
+    'ZOAB_tweelaags': ['ZOABTW TL', 'ZOABTW OL', 'ZOABTW DL', 'ZOABTW'],
+    'ZOAB_special': ['ZOABDI', 'ZOEAB'],
+    'SMA': ['SMA', 'SMA-NL', 'SMA 8G+', 'SMA 8 Geel'],
     'AC': ['AC 11 Surf', 'AC 16 Surf'],
-    'Other': ['DGD', 'EAB']
+    'thin_layer': ['DGD'],
+    'emulsion': ['EAB']
 }
 
-# 分类
-for main_type, variants in main_types.items():
-    mask = df['DEKLAAGSOORT'].str.contains('|'.join(variants), na=False)
-    df.loc[mask, 'surface_type_category'] = main_type
-```
+# 4️⃣ 分配家族
+def assign_family(deklaagsoort):
+    for family, patterns in surface_families.items():
+        for pattern in patterns:
+            if pattern in str(deklaagsoort):
+                return family
+    return 'unknown'
 
-**3️⃣ 与其他字段关联：**
-```python
-# ZOAB类型应该配合PA级配
-zoab_pa_check = df[
-    (df['DEKLAAGSOORT'].str.contains('ZOAB', na=False)) &
-    (~df['GRANULAIR MENGSEL'].str.contains('PA', na=False))
+df['surface_family'] = df['DEKLAAGSOORT'].apply(assign_family)
+
+# 5️⃣ 验证与GRANULAIR MENGSEL的一致性
+# ZOAB系列应配合PA级配
+zoab_check = df[
+    (df['surface_family'].str.contains('ZOAB', na=False)) &
+    (~df['GRANULAIR MENGSEL'].str.contains('PA', na=False, case=False))
 ]
-print(f"ZOAB类型但非PA级配: {len(zoab_pa_check)} 行")
+print(f"⚠️ ZOAB类型但非PA级配: {len(zoab_check)} 行")
 ```
 
-**数据库设计：**
+**📋 数据验证规则：**
+
+```python
+# 验证1：DEKLAAGSOORT不能为空
+assert df['DEKLAAGSOORT'].notna().sum() / len(df) > 0.9, \
+    "DEKLAAGSOORT缺失率过高"
+
+# 验证2：尾随空格检查
+trailing_spaces = df['DEKLAAGSOORT'].str.endswith(' ', na=False).sum()
+assert trailing_spaces == 0, \
+    f"发现{trailing_spaces}行数据有尾随空格"
+
+# 验证3：ZOAB系列应配PA级配
+zoab_mask = df['DEKLAAGSOORT'].str.contains('ZOAB', na=False, case=False)
+zoab_without_pa = df[zoab_mask & ~df['GRANULAIR MENGSEL'].str.contains('PA', na=False, case=False)]
+if len(zoab_without_pa) > 0:
+    print(f"⚠️ 警告：{len(zoab_without_pa)}行ZOAB类型未使用PA级配")
+
+# 验证4：未识别的面层类型
+known_types = ['DZOAB', 'ZOAB', 'ZOABTW', 'ZOABDI', 'ZOEAB', 
+               'SMA', 'AC', 'DGD', 'EAB']
+unknown = df[~df['DEKLAAGSOORT'].str.contains('|'.join(known_types), na=False, case=False)]
+if len(unknown) > 0:
+    print(f"⚠️ 警告：{len(unknown)}行未识别的面层类型")
+    print(unknown['DEKLAAGSOORT'].unique())
+```
+
+**🗄️ 数据库设计建议：**
+
 ```sql
-CREATE TABLE surface_types (
-    type_code VARCHAR(50) PRIMARY KEY,
-    main_category VARCHAR(20), -- 'ZOAB', 'SMA', 'AC', 'Other'
-    is_porous BOOLEAN,
+-- 面层类型参考表
+CREATE TABLE surface_layer_types (
+    type_code VARCHAR(100) PRIMARY KEY,
+    family VARCHAR(50) NOT NULL,          -- ZOAB, SMA, AC, thin_layer, emulsion
+    structure VARCHAR(50),                -- single, two_layer, thin_overlay, etc.
+    gradation VARCHAR(20),                -- 8, 11, 16, fijn, standard
+    features VARCHAR(100),                -- durable, low_noise, colored_geel, etc.
+    is_porous BOOLEAN NOT NULL,
     is_noise_reducing BOOLEAN,
-    typical_gradation VARCHAR(20),
+    typical_void_content DECIMAL(5,2),    -- 空隙率%
     description_nl TEXT,
-    description_en TEXT
+    description_en TEXT,
+    description_cn TEXT
 );
 
+-- 道路段表（外键关联）
 CREATE TABLE road_segments (
-    deklaagsoort VARCHAR(50),
-
-    FOREIGN KEY (deklaagsoort) REFERENCES surface_types(type_code),
-    CHECK (deklaagsoort IS NOT NULL)
+    segment_id INT PRIMARY KEY,
+    deklaagsoort VARCHAR(100) NOT NULL,
+    
+    -- 外键约束
+    FOREIGN KEY (deklaagsoort) 
+        REFERENCES surface_layer_types(type_code)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    
+    -- 检查约束
+    CONSTRAINT chk_deklaagsoort_not_empty 
+        CHECK (TRIM(deklaagsoort) <> '')
 );
+
+-- 插入标准面层类型（示例）
+INSERT INTO surface_layer_types VALUES
+('DZOAB', 'ZOAB', 'single', 'standard', 'durable', TRUE, TRUE, 20.0, 
+ 'Duurzaam Zeer Open Asfaltbeton', 'Durable Porous Asphalt', '耐久多孔沥青'),
+('ZOAB', 'ZOAB', 'single', 'standard', 'standard', TRUE, TRUE, 20.0,
+ 'Zeer Open Asfaltbeton', 'Porous Asphalt', '标准多孔沥青'),
+('ZOABTW TL', 'ZOAB', 'two_layer_top', 'fijn', 'standard', TRUE, TRUE, 20.0,
+ 'Tweelaags ZOAB Toplaag', 'Two-layer Porous Asphalt Top', '双层多孔沥青-上层'),
+('ZOABTW OL', 'ZOAB', 'two_layer_bottom', 'grof', 'standard', TRUE, TRUE, 20.0,
+ 'Tweelaags ZOAB Onderlaag', 'Two-layer Porous Asphalt Bottom', '双层多孔沥青-下层');
 ```
 
-**❓ 待与Leon确认的问题：**
+**❓ 需要与Leon确认的关键问题：**
 
-1. **ZOABTW后缀含义：**
-   - TL (Toplaag) vs DL (Deklaag) - 是否相同？
-   - 26次无后缀的ZOABTW应该归类为哪一层？
+**🔴 高优先级（影响数据分类）：**
 
-2. **变体含义：**
-   - "ZOAB+" 是什么？改进型ZOAB？
-   - "ZOEAB" - 拼写错误还是特殊类型？
-   - "DGD" 的全称是什么？
+1. **ZOABTW DL 的含义** (VERIFY-DL-01)
+   - 问题：DL (Deklaag) 是否真的等同于 Toplaag (上层面层)？
+   - 当前假设：DL = 上层
+   - 影响：如果正确，则 ZOABTW DL ≈ ZOABTW TL (都是上层)
+   - 数据量：21行 (1.4%)
 
-3. **SMA规格：**
-   - "SMA 8 Geel" 黄色SMA的用途？
-   - "SMA-NL 11B" 中的"11B"规格含义？
+2. **ZOABTW TL 的含义** (VERIFY-TL-01)
+   - 问题：TL 是 Toplaag (上层) 还是 Tussenlaag (中间层/结合层)？
+   - 当前假设：TL = Toplaag (上层)
+   - 备选假设：TL = Tussenlaag (中间层)
+   - 影响：如果是Tussenlaag，意义完全不同（结合层而非面层）
+   - 数据量：185行 (12.7%)
 
-4. **标准化策略：**
-   - 是否建立标准面层类型列表？
-   - 过度详细的规格是否应简化？
-   - 尾随空格应如何处理（自动清理还是报错）？
+3. **ZOABTW fijn OL 的矛盾** (VERIFY-ZOABTW-01)
+   - 问题：数据中出现"ZOABTW fijn OL"，但OL(下层)通常是粗级配，fijn表示细级配，这是数据错误还是特殊配置？
+   - 矛盾点：fijn (细级配) vs OL (下层应为粗级配)
+   - 数据量：5行 (0.3%)
 
-**参考来源：**
-- 📄 config/field_mapping_2022.json - 字段定义
-- 📊 Analysis/Template_2022_Field_Analysis_OLD.md (lines 1120-1191) - 真实数据统计
+**⚠️ 中低优先级（影响分类细节）：**
+
+4. **SMA 8 Geel 的性能特性** (VERIFY-SMA-01)
+   - 问题：SMA 8 Geel 除了黄色外，是否有特殊声学性能？是否有标准配方？
+   - 当前认知：仅确认8mm粒径 + 黄色
+   - 数据量：4行 (0.3%)
+
+5. **材料属性分离建议** (SUGGEST-01)
+   - 问题：SMA-NL 11B PMB SBS Bestone
+   - 建议：将PMB/SBS/Bestone等材料属性分离到字段15 (MENGSELCODE) 或创建新的材料属性字段
+   - 理由：这些是沥青改性剂和石料品牌，不是面层类型本身
+   - 数据量：1行 (0.1%)
+
+**📖 参考来源：**
+
+- 📄 config/field_mapping_2022.json - 字段17完整定义
+- 📄 Analysis/DEKLAAGSOORT_Standardization_Framework.md - 四维分类框架
+- 📊 真实数据统计 - 1,592行Template 2022数据
 - 📖 RAW Bepalingen - 荷兰道路技术规范
 - 📖 CROW Publicatie 147 - ZOAB设计和施工指南
+- 💬 用户提供的详细分类规则 (2025-11-05)
+
+**🔗 字段关联：**
+
+- **MENGSELCODE (字段15)** - 应包含材料改性信息(PMB/SBS等)
+- **GRANULAIR MENGSEL (字段16)** - ZOAB系列应配PA级配
+- **DIKTE VERHARDING (字段18)** - 面层厚度与面层类型相关
 
 
+---
 ---
 
 ### 18. DIKTE VERHARDING

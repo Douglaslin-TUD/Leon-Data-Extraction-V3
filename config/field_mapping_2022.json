@@ -619,9 +619,254 @@
       "classification": "critical",
       "category": "material_specification",
       "validation_rules": {
-        "enum": ["ZOAB", "DZOAB", "SMA", "Tweelaags ZOAB", "Duurzaam ZOAB", "DAB", "PA", "Dunne deklagen"]
+        "type": "string",
+        "max_length": 100,
+        "pattern": "^[A-Z0-9\\s\\+\\-\\.]+$"
       },
-      "description": "Type of surface layer (wearing course)"
+      "description": "Type of surface layer (wearing course) - asphalt mixture family and structural configuration",
+      "naming_structure": {
+        "description": "DEKLAAGSOORT命名由多层组成，需要理解各部分含义",
+        "components": {
+          "family": "家族/结构类型 (ZOAB, DZOAB, SMA, AC, DGD, EAB等)",
+          "layer_position": "层位 (DL=Deklaag上层, OL=Onderlaag下层, TL=Toplaag上层)",
+          "gradation": "粒级/细度 (8, 11, 16, fijn等)",
+          "features": "附加属性 (D/+耐久, NL荷兰标准, Geel黄色, G+静音等)"
+        }
+      },
+      "surface_layer_families": {
+        "ZOAB_series": {
+          "description": "多孔沥青系列 (Zeer Open Asfaltbeton) - 排水+降噪主力",
+          "types": {
+            "DZOAB": {
+              "full_name": "Duurzaam Zeer Open Asfaltbeton",
+              "name_cn": "耐久多孔沥青",
+              "structure": "single_layer",
+              "void_content": "zeer_open (仍然是高空隙，不是密级配)",
+              "features": "耐久型、改进版ZOAB",
+              "note": "DZOAB与ZOAB+都可归入耐久ZOAB家族"
+            },
+            "ZOAB_plus": {
+              "full_name": "ZOAB+",
+              "name_cn": "耐久多孔沥青+",
+              "structure": "single_layer",
+              "features": "改进型、耐久",
+              "equivalent_to": "DZOAB (性能相似)"
+            },
+            "ZOAB": {
+              "full_name": "Zeer Open Asfaltbeton",
+              "name_cn": "标准多孔沥青",
+              "structure": "single_layer",
+              "usage": "常规高速主线排水降噪",
+              "note": "数据中'ZOAB'和'ZOAB '(带空格)应归为同一类"
+            },
+            "ZOABTW": {
+              "full_name": "Tweelaags ZOAB",
+              "name_cn": "双层多孔沥青",
+              "structure": "two_layer_system",
+              "description": "双层多孔沥青面层系统，上层细级配+下层粗级配",
+              "layer_notation": {
+                "DL": {
+                  "full_name": "Deklaag",
+                  "meaning": "上层面层 (等同于Toplaag)",
+                  "gradation": "fijn (细级配)",
+                  "verification_status": "需与Leon确认DL是否确实=上层"
+                },
+                "TL": {
+                  "full_name": "Toplaag (推测)",
+                  "meaning": "上层面层",
+                  "gradation": "fijn (细级配)",
+                  "verification_status": "需与Leon确认TL是否=Toplaag而非Tussenlaag"
+                },
+                "OL": {
+                  "full_name": "Onderlaag",
+                  "meaning": "下层面层",
+                  "gradation": "grof (粗级配)",
+                  "verification_status": "confirmed"
+                }
+              },
+              "redundancy_handling": {
+                "description": "双层ZOAB上层必然为细级配，fijn标注为冗余信息",
+                "equivalents": [
+                  "ZOABTW-fijn DL ≈ ZOABTW DL",
+                  "ZOABTW fijn ≈ ZOABTW (泛指)",
+                  "ZOABTW fijn OL ≈ ZOABTW OL (但fijn与OL矛盾，需确认)"
+                ]
+              },
+              "data_quality_issue": {
+                "problem": "ZOABTW fijn OL 出现矛盾",
+                "explanation": "OL(下层)通常为粗级配，但标注了fijn(细级配)",
+                "verification_needed": "需与Leon确认是数据错误还是特殊配置"
+              }
+            },
+            "ZOABDI": {
+              "full_name": "ZOAB - Dunne Inlage",
+              "name_cn": "ZOAB薄层罩面",
+              "structure": "thin_overlay",
+              "DI_meaning": "Dunne Inlage (薄内嵌层/薄罩面)",
+              "description": "在旧ZOAB上加铺薄层ZOAB型嵌补/罩面",
+              "function": "改良表面、抗剥落、延长寿命",
+              "characteristics": "具有ZOAB空隙与纹理，结构上接近DGD类薄层降噪罩面",
+              "classification": "独立类别，不等同于ZOABTW DL"
+            },
+            "ZOEAB": {
+              "full_name": "Zeer Open Emulsie Asfaltbeton",
+              "name_cn": "ZOAB寿命延长层 (高空隙乳化罩面)",
+              "structure": "emulsion_overlay",
+              "description": "高空隙乳化沥青混凝土，专门做在旧ZOAB上的寿命延长层",
+              "function": [
+                "修复轻度剥落的ZOAB",
+                "恢复纹理",
+                "封闭和延寿"
+              ],
+              "category": "乳化沥青养护类"
+            }
+          }
+        },
+        "SMA_series": {
+          "description": "沥青玛蹄脂碎石系列 (Stone Mastic Asphalt) - 抗车辙主力",
+          "types": {
+            "SMA": {
+              "full_name": "Stone Mastic Asphalt",
+              "name_cn": "标准SMA面层",
+              "features": "玛蹄脂骨架、抗车辙好"
+            },
+            "SMA_NL_11B": {
+              "full_name": "SMA-NL 11B",
+              "name_cn": "荷兰11B型SMA面层",
+              "standard": "荷兰标准系列",
+              "gradation": "11mm",
+              "type": "B型配方"
+            },
+            "SMA_NL_11": {
+              "full_name": "SMA-NL 11",
+              "name_cn": "荷兰11型SMA面层",
+              "standard": "荷兰标准系列",
+              "gradation": "11mm",
+              "note": "无B型细分或A/B未明示"
+            },
+            "SMA_8G_plus": {
+              "full_name": "SMA 8G+",
+              "name_cn": "8mm静音型SMA (G+变型)",
+              "gradation": "8mm",
+              "features": "G+型降噪SMA，专门调成更安静"
+            },
+            "SMA_8_Geel": {
+              "full_name": "SMA 8 Geel",
+              "name_cn": "黄色8mm SMA",
+              "gradation": "8mm",
+              "color": "Geel (黄色)",
+              "verification_status": "仅确认颜色信息，性能特性需与Leon确认",
+              "questions": [
+                "是否有特殊声学性能？",
+                "是否对应特定标准配方？",
+                "还是仅项目自定义着色？"
+              ]
+            },
+            "SMA_NL_11B_PMB_SBS_Bestone": {
+              "full_name": "SMA-NL 11B PMB SBS Bestone",
+              "name_cn": "改性SMA-NL 11B (PMB+SBS+Bestone)",
+              "base_type": "SMA-NL 11B",
+              "modifiers": {
+                "PMB": "聚合物改性沥青 (Polymer Modified Bitumen)",
+                "SBS": "SBS改性剂",
+                "Bestone": "特定石料品牌/类型"
+              },
+              "note": "建议将PMB/SBS/Bestone分离到材料属性字段(字段15或新字段)"
+            }
+          }
+        },
+        "AC_series": {
+          "description": "致密级配沥青混凝土系列 (Asfaltbeton) - 非多孔常规面层",
+          "types": {
+            "AC_16_Surf": {
+              "full_name": "AC 16 Surf",
+              "name_cn": "16mm AC面层",
+              "gradation": "16mm (最大粒径)",
+              "layer": "Surface (表层)",
+              "usage": "不要求降噪的路段"
+            },
+            "AC_11_Surf": {
+              "full_name": "AC 11 Surf",
+              "name_cn": "11mm AC面层",
+              "gradation": "11mm (最大粒径)",
+              "layer": "Surface (表层)",
+              "usage": "不要求降噪的路段"
+            }
+          }
+        },
+        "thin_layer_and_emulsion_series": {
+          "description": "薄层与乳化养护类",
+          "types": {
+            "DGD": {
+              "full_name": "Dunne Geluidreducerende Deklaag",
+              "name_cn": "DGD - 薄层降噪面层",
+              "structure": "thin_layer",
+              "usage": "省道、市政道路以及作为ZOAB的替代型静音面层"
+            },
+            "EAB": {
+              "full_name": "Emulsie Asfaltbeton",
+              "name_cn": "EAB - 乳化沥青混凝土 (冷拌养护层)",
+              "structure": "cold_mix",
+              "features": "冷拌、节能",
+              "usage": [
+                "车辙修复",
+                "旧路表面翻新",
+                "纹理恢复"
+              ],
+              "category": "乳化/冷拌养护面层"
+            }
+          }
+        }
+      },
+      "verification_required": {
+        "description": "以下问题需要与Leon确认",
+        "critical_questions": [
+          {
+            "id": "VERIFY-DL-01",
+            "field": "ZOABTW DL",
+            "question": "DL (Deklaag) 是否真的等同于 Toplaag (上层面层)？",
+            "current_assumption": "DL = 上层",
+            "impact": "如果正确，则ZOABTW DL ≈ ZOABTW TL (都是上层)",
+            "priority": "HIGH"
+          },
+          {
+            "id": "VERIFY-TL-01",
+            "field": "ZOABTW TL",
+            "question": "TL 是 Toplaag (上层) 还是 Tussenlaag (中间层/结合层)？",
+            "current_assumption": "TL = Toplaag (上层)",
+            "alternative": "TL = Tussenlaag (中间层)",
+            "impact": "如果是Tussenlaag，意义完全不同（结合层而非面层）",
+            "priority": "HIGH"
+          },
+          {
+            "id": "VERIFY-ZOABTW-01",
+            "field": "ZOABTW fijn OL",
+            "question": "数据中出现'ZOABTW fijn OL'，但OL(下层)通常是粗级配，fijn表示细级配，这是数据错误还是特殊配置？",
+            "contradiction": "fijn (细级配) vs OL (下层应为粗级配)",
+            "priority": "MEDIUM"
+          },
+          {
+            "id": "VERIFY-SMA-01",
+            "field": "SMA 8 Geel",
+            "question": "SMA 8 Geel除了黄色外，是否有特殊声学性能？是否有标准配方？",
+            "current_knowledge": "仅确认8mm粒径 + 黄色",
+            "priority": "LOW"
+          }
+        ],
+        "data_separation_suggestion": {
+          "id": "SUGGEST-01",
+          "field": "SMA-NL 11B PMB SBS Bestone",
+          "suggestion": "建议将PMB/SBS/Bestone等材料属性分离到字段15 (MENGSELCODE) 或创建新的材料属性字段",
+          "reason": "这些是沥青改性剂和石料品牌，不是面层类型本身"
+        }
+      },
+      "data_quality_notes": {
+        "trailing_spaces": "数据中存在'ZOAB'和'ZOAB '(带尾随空格)，应归为同一类",
+        "case_sensitivity": "大小写不一致问题较少，但需要标准化",
+        "missing_values": "存在少量空值，需要处理策略"
+      },
+      "date_added": "2025-11-05",
+      "last_updated": "2025-11-05"
     },
     {
       "field_number": 18,
