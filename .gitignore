@@ -75,3 +75,6 @@ htmlcov/
 
 # OS
 Thumbs.db
+# Large PDF documentation files (keep local only)
+Documents/*.pdf
+Documents/*.PDF

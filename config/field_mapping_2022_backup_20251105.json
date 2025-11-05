@@ -1,0 +1,584 @@
+{
+  "metadata": {
+    "template_name": "Verzamelstaat_2022c.xlsx",
+    "sheet_name": "Blad1",
+    "version": "1.0",
+    "date_created": "2025-11-05",
+    "description": "Field mapping configuration for 2022 RWS road maintenance data template",
+    "total_fields": 26,
+    "critical_fields": 16,
+    "non_critical_fields": 10
+  },
+  "fields": [
+    {
+      "field_number": 1,
+      "field_name_nl": "NAAM OPDRACHTNEMER",
+      "field_name_en": "Contractor Name",
+      "field_name_cn": "承包商名称",
+      "data_type": "string",
+      "required": true,
+      "classification": "non-critical",
+      "category": "organizational_info",
+      "validation_rules": {
+        "min_length": 1,
+        "max_length": 200
+      },
+      "description": "Name of the contractor executing the road maintenance work"
+    },
+    {
+      "field_number": 2,
+      "field_name_nl": "DISTRICT",
+      "field_name_en": "District",
+      "field_name_cn": "区域",
+      "data_type": "string",
+      "required": true,
+      "classification": "critical",
+      "category": "organizational_info",
+      "validation_rules": {
+        "enum": ["NN-Oost", "Zee en Delta", "Noord", "Oost", "Zuid", "West"]
+      },
+      "description": "RWS management district"
+    },
+    {
+      "field_number": 3,
+      "field_name_nl": "ZAAKNUMMER",
+      "field_name_en": "Case Number",
+      "field_name_cn": "案件编号",
+      "data_type": "string",
+      "required": true,
+      "classification": "critical",
+      "category": "project_identification",
+      "validation_rules": {
+        "pattern": "^[A-Z0-9-]+$"
+      },
+      "description": "RWS internal project tracking number"
+    },
+    {
+      "field_number": 4,
+      "field_name_nl": "Weg",
+      "field_name_en": "Road Number",
+      "field_name_cn": "道路编号",
+      "data_type": "string",
+      "max_length": 6,
+      "required": true,
+      "classification": "critical",
+      "category": "location_identification",
+      "data_flow": {
+        "input_stage": {
+          "description": "Accept multiple format variants from contractors",
+          "accepted_formats": ["numeric", "A_prefix", "RW_prefix"],
+          "examples": ["1", "21", "A1", "A21", "RW1", "RW001", "RW21", "RW021"],
+          "pattern": "^(\\d{1,3}|A\\d{1,3}|RW\\d{1,4})$"
+        },
+        "normalization_stage": {
+          "description": "Standardize to unified format with leading zero removal",
+          "process": [
+            "1. Strip prefixes (A/RW)",
+            "2. Convert to integer (removes leading zeros)",
+            "3. Add 'A' prefix"
+          ],
+          "examples": {
+            "1": "A1",
+            "21": "A21",
+            "A1": "A1",
+            "A21": "A21",
+            "RW001": "A1",
+            "RW021": "A21",
+            "RW28": "A28"
+          },
+          "storage_format": "A{number}",
+          "remove_leading_zeros": true
+        },
+        "storage_stage": {
+          "description": "Store in database with unified format",
+          "db_type": "VARCHAR(6)",
+          "format": "A{number}",
+          "examples": ["A1", "A21", "A28", "A200"],
+          "no_leading_zeros": true,
+          "reason_for_varchar": "Preserve 'A' prefix, support future N-roads, consistency with other text fields"
+        },
+        "output_stage": {
+          "description": "Convert to pure number for Excel export",
+          "process": [
+            "1. Remove 'A' prefix",
+            "2. Convert to integer",
+            "3. Output as Number type in Excel"
+          ],
+          "examples": {
+            "A1": 1,
+            "A21": 21,
+            "A28": 28,
+            "A200": 200
+          },
+          "excel_type": "Number",
+          "no_text_formatting": true
+        }
+      },
+      "validation_rules": {
+        "input_pattern": "^(\\d{1,3}|A\\d{1,3}|RW\\d{1,4})$",
+        "accepted_formats": ["numeric", "A_prefix", "RW_prefix"],
+        "normalization_required": true,
+        "N_roads_warning": "N roads are provincial roads, not national highways"
+      },
+      "format_examples": {
+        "current_data": ["1", "28", "50", "200", "835"],
+        "future_possible": ["A1", "RW001", "RW021", "RW28"],
+        "equivalent_values": {
+          "note": "All these input formats become the same stored value",
+          "A1": {
+            "inputs": ["1", "A1", "RW1", "RW001"],
+            "stored_as": "A1",
+            "excel_output": 1
+          },
+          "A21": {
+            "inputs": ["21", "A21", "RW21", "RW021"],
+            "stored_as": "A21",
+            "excel_output": 21
+          },
+          "A28": {
+            "inputs": ["28", "A28", "RW28", "RW028"],
+            "stored_as": "A28",
+            "excel_output": 28
+          },
+          "A200": {
+            "inputs": ["200", "A200", "RW200"],
+            "stored_as": "A200",
+            "excel_output": 200
+          }
+        },
+        "NOT_equivalent": {
+          "note": "N roads are provincial, NOT national highways",
+          "example": "N200 ≠ A200 (different road systems)"
+        }
+      },
+      "road_classification": {
+        "A_RW": {
+          "type": "National Highway",
+          "description": "Autosnelweg/Rijksweg - RWS managed national highways",
+          "equivalence": "A and RW prefixes represent the same road",
+          "prefixes": ["A", "RW"],
+          "leading_zero_handling": "Automatically removed during normalization"
+        },
+        "N": {
+          "type": "Provincial Road",
+          "description": "Nationale weg - Provincial roads, NOT RWS managed",
+          "should_appear": false,
+          "action_if_found": "Mark as warning - data may be incorrect",
+          "storage_handling": "Keep original format (N200) if encountered",
+          "excel_output": "Output as text (N200) not number"
+        }
+      },
+      "data_statistics": {
+        "total_roads": 34,
+        "range": "1-835",
+        "most_common": [
+          {"road": "28", "count": 422, "percentage": 26.5},
+          {"road": "1", "count": 369, "percentage": 23.2},
+          {"road": "50", "count": 133, "percentage": 8.4}
+        ]
+      },
+      "description": "National highway number (Rijksweg). Input accepts 1/A1/RW1/RW001, stores as A1, outputs as 1 in Excel. Leading zeros automatically removed. A and RW are equivalent. N roads are provincial roads."
+    },
+    {
+      "field_number": 5,
+      "field_name_nl": "BAAN",
+      "field_name_en": "Carriageway",
+      "field_name_cn": "车道类型",
+      "data_type": "string",
+      "required": true,
+      "classification": "critical",
+      "category": "location_identification",
+      "validation_rules": {
+        "pattern": "^(\\d{1})(VW|HR[LRM])$"
+      },
+      "description": "Carriageway classification code (0VW, 1HRL, 1HRR, 0HRM, etc.)"
+    },
+    {
+      "field_number": 6,
+      "field_name_nl": "WEGLET (zie toelichting blad 2)",
+      "field_name_en": "Road Letter",
+      "field_name_cn": "道路字母标识",
+      "data_type": "string",
+      "required": false,
+      "classification": "critical",
+      "category": "location_identification",
+      "validation_rules": {
+        "pattern": "^[a-z]$"
+      },
+      "description": "Road subdivision letter (a-z), particularly important for 0VW types"
+    },
+    {
+      "field_number": 7,
+      "field_name_nl": "VAN (graag tot min. 10 meter nauwkeurig)",
+      "field_name_en": "From (Hectometer)",
+      "field_name_cn": "起始位置",
+      "data_type": "number",
+      "unit": "hectometer",
+      "required": true,
+      "classification": "critical",
+      "category": "location_identification",
+      "validation_rules": {
+        "type": "float",
+        "min": -10,
+        "max": 1000,
+        "precision": 1,
+        "european_format": true
+      },
+      "description": "Starting position in hectometers (can be negative)"
+    },
+    {
+      "field_number": 8,
+      "field_name_nl": "TOT (graag tot min. 10 meter nauwkeurig)",
+      "field_name_en": "To (Hectometer)",
+      "field_name_cn": "结束位置",
+      "data_type": "number",
+      "unit": "hectometer",
+      "required": true,
+      "classification": "critical",
+      "category": "location_identification",
+      "validation_rules": {
+        "type": "float",
+        "min": -10,
+        "max": 1000,
+        "precision": 1,
+        "european_format": true,
+        "must_be_gte": "VAN"
+      },
+      "description": "Ending position in hectometers"
+    },
+    {
+      "field_number": 9,
+      "field_name_nl": "STROOK",
+      "field_name_en": "Lane",
+      "field_name_cn": "车道编号",
+      "data_type": "string",
+      "required": true,
+      "classification": "critical",
+      "category": "lane_identification",
+      "validation_rules": {
+        "pattern": "^(\\d{1}[RWUIQB]-[LR]|ALL)$"
+      },
+      "lane_types": {
+        "R": "Rijstrook (Regular lane)",
+        "W": "Weefstrook (Weaving lane)",
+        "I": "Invoegstrook (Acceleration lane)",
+        "U": "Uitvoegstrook (Deceleration lane)",
+        "Q": "Spitsstrook (Rush hour lane)",
+        "B": "Busstrook (Bus lane)",
+        "ALL": "Rijbaanbreed (Full carriageway width)"
+      },
+      "description": "Lane identification with type and direction"
+    },
+    {
+      "field_number": 10,
+      "field_name_nl": "Aantal rijstroken - in geval van rijbaanbreed (ALL)",
+      "field_name_en": "Number of Lanes",
+      "field_name_cn": "车道数量",
+      "data_type": "integer",
+      "required": false,
+      "classification": "critical",
+      "category": "lane_information",
+      "validation_rules": {
+        "min": 1,
+        "max": 6,
+        "required_when": {
+          "field": "STROOK",
+          "equals": "ALL"
+        }
+      },
+      "description": "Number of lanes when full carriageway width (ALL)"
+    },
+    {
+      "field_number": 11,
+      "field_name_nl": "KM_Van",
+      "field_name_en": "Kilometer From",
+      "field_name_cn": "起点公里数",
+      "data_type": "number",
+      "unit": "kilometer",
+      "required": true,
+      "classification": "critical",
+      "category": "location_identification",
+      "validation_rules": {
+        "type": "float",
+        "min": -1,
+        "max": 500,
+        "precision": 3,
+        "european_format": true,
+        "derived_from": "VAN / 10"
+      },
+      "description": "Starting position in kilometers"
+    },
+    {
+      "field_number": 12,
+      "field_name_nl": "KM_Tot",
+      "field_name_en": "Kilometer To",
+      "field_name_cn": "终点公里数",
+      "data_type": "number",
+      "unit": "kilometer",
+      "required": true,
+      "classification": "critical",
+      "category": "location_identification",
+      "validation_rules": {
+        "type": "float",
+        "min": -1,
+        "max": 500,
+        "precision": 3,
+        "european_format": true,
+        "derived_from": "TOT / 10",
+        "must_be_gte": "KM_Van"
+      },
+      "description": "Ending position in kilometers"
+    },
+    {
+      "field_number": 13,
+      "field_name_nl": "Lengte",
+      "field_name_en": "Length",
+      "field_name_cn": "长度",
+      "data_type": "number",
+      "unit": "meter",
+      "required": true,
+      "classification": "critical",
+      "category": "quantity",
+      "validation_rules": {
+        "type": "float",
+        "min": 1,
+        "max": 50000,
+        "european_format": true,
+        "derived_from": "(TOT - VAN) * 100"
+      },
+      "description": "Total length of the work section in meters"
+    },
+    {
+      "field_number": 14,
+      "field_name_nl": "Breedte",
+      "field_name_en": "Width",
+      "field_name_cn": "宽度",
+      "data_type": "number",
+      "unit": "meter",
+      "required": true,
+      "classification": "non-critical",
+      "category": "quantity",
+      "validation_rules": {
+        "type": "float",
+        "min": 3.0,
+        "max": 20.0,
+        "european_format": true
+      },
+      "description": "Width of the pavement section in meters"
+    },
+    {
+      "field_number": 15,
+      "field_name_nl": "MENGSELCODE",
+      "field_name_en": "Mixture Code",
+      "field_name_cn": "混合料代码",
+      "data_type": "string",
+      "required": true,
+      "classification": "critical",
+      "category": "material_specification",
+      "validation_rules": {
+        "pattern": "^[A-Z0-9\\s]+$"
+      },
+      "description": "Asphalt mixture code according to Dutch standards"
+    },
+    {
+      "field_number": 16,
+      "field_name_nl": "GRANULAIR MENGSEL (0/16, 4/8, 2/6, 0/11, 0/8 enz)",
+      "field_name_en": "Aggregate Gradation",
+      "field_name_cn": "骨料级配",
+      "data_type": "string",
+      "required": true,
+      "classification": "critical",
+      "category": "material_specification",
+      "validation_rules": {
+        "pattern": "^\\d{1,2}/\\d{1,2}$"
+      },
+      "common_values": ["0/16", "0/11", "0/8", "4/8", "2/6", "0/22"],
+      "description": "Aggregate grain size range (min/max in mm)"
+    },
+    {
+      "field_number": 17,
+      "field_name_nl": "DEKLAAGSOORT (bijv. ZOAB, SMA, tweelaags ZOAB, duurzaam ZOAB, etc.)",
+      "field_name_en": "Surface Layer Type",
+      "field_name_cn": "面层类型",
+      "data_type": "string",
+      "required": true,
+      "classification": "critical",
+      "category": "material_specification",
+      "validation_rules": {
+        "enum": ["ZOAB", "DZOAB", "SMA", "Tweelaags ZOAB", "Duurzaam ZOAB", "DAB", "PA", "Dunne deklagen"]
+      },
+      "description": "Type of surface layer (wearing course)"
+    },
+    {
+      "field_number": 18,
+      "field_name_nl": "DIKTE VERHARDING",
+      "field_name_en": "Pavement Thickness",
+      "field_name_cn": "路面厚度",
+      "data_type": "number",
+      "unit": "millimeter",
+      "required": true,
+      "classification": "non-critical",
+      "category": "material_specification",
+      "validation_rules": {
+        "type": "integer",
+        "min": 20,
+        "max": 150
+      },
+      "description": "Thickness of the surface layer in millimeters"
+    },
+    {
+      "field_number": 19,
+      "field_name_nl": "TUSSENLAAG",
+      "field_name_en": "Binder Course",
+      "field_name_cn": "中间层",
+      "data_type": "string",
+      "required": false,
+      "classification": "non-critical",
+      "category": "material_specification",
+      "validation_rules": {
+        "enum": ["Ja", "Nee", ""]
+      },
+      "description": "Whether a binder course (intermediate layer) is present"
+    },
+    {
+      "field_number": 20,
+      "field_name_nl": "Mengselcode TUSSENLAAG",
+      "field_name_en": "Binder Course Mixture Code",
+      "field_name_cn": "中间层混合料代码",
+      "data_type": "string",
+      "required": false,
+      "classification": "non-critical",
+      "category": "material_specification",
+      "validation_rules": {
+        "pattern": "^[A-Z0-9\\s]*$",
+        "required_when": {
+          "field": "TUSSENLAAG",
+          "not_equals": ["Nee", ""]
+        }
+      },
+      "description": "Mixture code for binder course (if applicable)"
+    },
+    {
+      "field_number": 21,
+      "field_name_nl": "DIKTE TUSSENLAAG (indien van toepassing)",
+      "field_name_en": "Binder Course Thickness",
+      "field_name_cn": "中间层厚度",
+      "data_type": "number",
+      "unit": "millimeter",
+      "required": false,
+      "classification": "non-critical",
+      "category": "material_specification",
+      "validation_rules": {
+        "type": "integer",
+        "min": 40,
+        "max": 100,
+        "required_when": {
+          "field": "TUSSENLAAG",
+          "not_equals": ["Nee", ""]
+        }
+      },
+      "description": "Thickness of binder course in millimeters (if applicable)"
+    },
+    {
+      "field_number": 22,
+      "field_name_nl": "AANLEGDATUM",
+      "field_name_en": "Construction Date",
+      "field_name_cn": "施工日期",
+      "data_type": "date",
+      "required": true,
+      "classification": "critical",
+      "category": "construction_record",
+      "validation_rules": {
+        "format": ["DD-MM-YYYY", "YYYY-MM-DD"],
+        "min_year": 2000,
+        "max_year": 2030
+      },
+      "description": "Date when the asphalt was laid"
+    },
+    {
+      "field_number": 23,
+      "field_name_nl": "ASFALTCENTRALE",
+      "field_name_en": "Asphalt Plant",
+      "field_name_cn": "沥青拌合站",
+      "data_type": "string",
+      "required": true,
+      "classification": "non-critical",
+      "category": "construction_record",
+      "validation_rules": {
+        "min_length": 1,
+        "max_length": 200
+      },
+      "description": "Name or location of the asphalt mixing plant"
+    },
+    {
+      "field_number": 24,
+      "field_name_nl": "TONNEN",
+      "field_name_en": "Tonnes",
+      "field_name_cn": "吨数",
+      "data_type": "number",
+      "unit": "tonne",
+      "required": true,
+      "classification": "non-critical",
+      "category": "quantity",
+      "validation_rules": {
+        "type": "float",
+        "min": 0.1,
+        "max": 100000,
+        "european_format": true
+      },
+      "description": "Total weight of asphalt mixture used in tonnes"
+    },
+    {
+      "field_number": 25,
+      "field_name_nl": "evt. indien beschikbaar temperatuur (Productie)",
+      "field_name_en": "Production Temperature",
+      "field_name_cn": "生产温度",
+      "data_type": "number",
+      "unit": "celsius",
+      "required": false,
+      "classification": "non-critical",
+      "category": "quality_parameter",
+      "validation_rules": {
+        "type": "integer",
+        "min": 80,
+        "max": 200
+      },
+      "description": "Temperature of asphalt mixture at production (if available)"
+    },
+    {
+      "field_number": 26,
+      "field_name_nl": "OPMERKINGENVELD",
+      "field_name_en": "Remarks",
+      "field_name_cn": "备注字段",
+      "data_type": "string",
+      "required": false,
+      "classification": "non-critical",
+      "category": "remarks",
+      "validation_rules": {
+        "max_length": 1000
+      },
+      "description": "Additional comments or special notes"
+    }
+  ],
+  "field_groups": {
+    "unique_identifier": [4, 5, 6, 7, 8, 9],
+    "location": [4, 5, 6, 7, 8, 11, 12],
+    "lane_info": [5, 6, 9, 10],
+    "material": [15, 16, 17, 18, 19, 20, 21],
+    "quantity": [13, 14, 24],
+    "construction": [22, 23, 25],
+    "project_info": [1, 2, 3]
+  },
+  "validation_notes": {
+    "european_number_format": "Use comma (,) for decimal separator and dot (.) for thousands separator",
+    "position_system": "Hectometer (hm) system: 1 hm = 100 meters",
+    "negative_positions": "Negative values are allowed for positions before the road origin",
+    "derived_fields": "KM_Van, KM_Tot, and Lengte should be validated against VAN and TOT",
+    "conditional_required": "Some fields (10, 20, 21) are conditionally required based on other field values"
+  },
+  "reference_data": {
+    "rijstroken_validator": "Documents/Validator - rijstroken.xlsx",
+    "translation_reference": "Documents/Vertaallijst_EN-Nl_def2 (1).xlsx",
+    "lane_type_explanation": "Documents/Hallo Peng Luuk.txt"
+  }
+}
